@@ -1,18 +1,37 @@
-import ApplicationLogo from '@/Components/ApplicationLogo';
-import { Link } from '@inertiajs/react';
+import AuthImagePattern from '@/Components/authImagePatten';
 import { PropsWithChildren } from 'react';
+import { PiggyBank } from 'lucide-react';
 
 export default function Guest({ children }: PropsWithChildren) {
     return (
-        <div className="flex min-h-screen flex-col items-center bg-gray-100 pt-6 sm:justify-center sm:pt-0">
-            <div>
-                <Link href="/">
-                    <ApplicationLogo className="h-20 w-20 fill-current text-gray-500" />
-                </Link>
+        <div className="relative h-screen mx-auto overflow-hidden max-w-[1920px] bg-base-100 flex flex-col lg:flex-row">
+            {/* Logo/Brand - Mobile Only*/}
+            <div className='flex justify-start gap-3 m-4 lg:hidden'>
+                <PiggyBank className='size-8 text-primary' />
+                <h1 className="text-2xl font-bold text-primary">CASHFAM</h1>
             </div>
 
-            <div className="mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg">
-                {children}
+            <div className="flex-1 z-[1] flex items-center justify-center p-4 lg:p-0">
+                <div className='flex flex-col w-full max-w-lg'>
+                    {/* Logo/Brand - Desktop Only*/}
+                    <div className='hidden lg:flex justify-center gap-3 items-center mb-6'>
+                        <PiggyBank className='size-14 text-primary' />
+                        <h1 className="text-4xl font-bold text-primary">CASHFAM</h1>
+                    </div>
+
+                    {/* Card container */}
+                    <div className="card">
+                        <div className="card-body bg-base-200 lg:bg-transparent">
+                            {children}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className='w-1/3 hidden lg:flex'>
+                
+            </div>
+            <div className='absolute z-[0] w-[45rem] md:-top-10 md:-right-96 lg:-top-20 lg:-right-24'>
+                <AuthImagePattern />
             </div>
         </div>
     );
