@@ -5,9 +5,8 @@ import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 
 export default function Edit({
-    mustVerifyEmail,
     status,
-}: PageProps<{ mustVerifyEmail: boolean; status?: string }>) {
+}: PageProps<{ status?: string }>) {
     return (
         <AuthenticatedLayout
             header={
@@ -22,7 +21,6 @@ export default function Edit({
                 <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
                     <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8">
                         <UpdateProfileInformationForm
-                            mustVerifyEmail={mustVerifyEmail}
                             status={status}
                             className="max-w-xl"
                         />
