@@ -17,7 +17,7 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
-        return Inertia::render('Profile/Edit', [
+        return Inertia::render('Profile/Profile', [
             'status' => session('status'),
         ]);
     }
@@ -30,7 +30,7 @@ class ProfileController extends Controller
         $request->user()->fill($request->validated());
         $request->user()->save();
 
-        return Redirect::route('profile.edit');
+        return Redirect::route('profile.edit')->with('status', 'Profile updated successfully!');
     }
 
     /**
