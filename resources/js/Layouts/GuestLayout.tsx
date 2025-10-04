@@ -1,4 +1,4 @@
-import AuthImagePattern from '@/Components/authImagePatten';
+import AuthImagePattern from '@/Components/Auth/authImagePatten';
 import { PropsWithChildren } from 'react';
 import { PiggyBank } from 'lucide-react';
 
@@ -20,15 +20,13 @@ export default function Guest({ children }: PropsWithChildren) {
                     </div>
 
                     {/* Card container */}
-                    <div className="card bg-base-200 p-10 lg:bg-transparent">
+                    <fieldset className="card bg-base-200 p-10 lg:bg-transparent shadow-xl lg:shadow-none">
                         {children}
-                    </div>
+                    </fieldset>
                 </div>
             </div>
-            <div className='w-1/3 hidden lg:flex'>
-
-            </div>
-            <div className='absolute z-[0] w-[45rem] md:-top-10 md:-right-96 lg:-top-20 lg:-right-24'>
+            <div className='w-1/3 hidden lg:flex' />
+            <div className='absolute z-[0] w-[45rem] -right-120 md:-top-10 md:-right-96 lg:-top-20 lg:-right-24'>
                 <AuthImagePattern />
             </div>
         </div>
