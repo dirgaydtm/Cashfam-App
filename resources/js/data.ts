@@ -1,60 +1,5 @@
 // Dummy data for CasFam Finance Management App
-
-export interface User {
-    id: number;
-    name: string;
-    email: string;
-    avatar?: string;
-    created_at: string;
-}
-
-export interface FinancialBook {
-    id: string;
-    name: string;
-    description: string;
-    creator_id: number;
-    creator: User;
-    budget?: number;
-    currency: string;
-    members: BookMember[];
-    invitation_code: string;
-    created_at: string;
-    updated_at: string;
-}
-
-export interface BookMember {
-    id: string;
-    user: User;
-    role: "creator" | "admin" | "member";
-    joined_at: string;
-}
-
-export interface Transaction {
-    id: string;
-    book_id: string;
-    user_id: number;
-    user: User;
-    type: "income" | "expense";
-    category: string;
-    amount: number;
-    description: string;
-    date: string;
-    status: "pending" | "approved" | "rejected";
-    approved_by?: User;
-    created_at: string;
-    updated_at: string;
-}
-
-export interface Invitation {
-    id: string;
-    book_id: string;
-    book: FinancialBook;
-    code: string;
-    used_by?: User;
-    used_at?: string;
-    expires_at: string;
-    created_at: string;
-}
+import type { User, FinancialBook, Transaction } from '@/types';
 
 // Dummy Users
 export const dummyUsers: User[] = [
@@ -128,7 +73,7 @@ export const dummyFinancialBooks: FinancialBook[] = [
     {
         id: "2",
         name: "Liburan ke Bali",
-        description: "Merencanakan dan melacak pengeluaran untuk liburan ke Bali",
+        description: "Merencanakan dan melacak pengeluaran untuk liburan ke bali",
         creator_id: 1,
         creator: dummyUsers[0],
         budget: 45000000,
