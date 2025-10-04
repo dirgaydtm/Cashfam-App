@@ -110,9 +110,14 @@ export default function Login({
                         )}
                     </div>
 
-                    <div className="flex items-center gap-2  text-sm justify-start text-warning">
-                        <CircleAlert size={17} />
-                        Keep your account secure
+                    {/* Remember me */}
+                    <div className="form-control">
+                        <label className="cursor-pointer label mx-2 gap-2 justify-start">
+                            <input type="checkbox" className="checkbox checkbox-primary checkbox-xs rounded-none" required />
+                            <span className="label-text text-xs md:text-base">
+                                Remember me
+                            </span>
+                        </label>
                     </div>
 
                     {/* Submit button */}

@@ -146,11 +146,11 @@ export default function Register() {
                     <div className="form-control">
                         <label className="cursor-pointer label mx-2 gap-2 justify-start">
                             <input type="checkbox" className="checkbox checkbox-primary checkbox-xs rounded-none" required />
-                            <span className="label-text text-sm">
+                            <span className="label-text text-xs md:text-base">
                                 I agree to the{' '}
-                                <a href="#" className="link link-primary hover:link-hover">Terms of Service</a>
+                                <a href="#" className="link text-xs md:text-base link-primary hover:link-hover">Terms of Service</a>
                                 {' '}and{' '}
-                                <a href="#" className="link link-primary hover:link-hover">Privacy Policy</a>
+                                <a href="#" className="link text-xs md:text-base link-primary hover:link-hover">Privacy Policy</a>
                             </span>
                         </label>
                     </div>
@@ -168,10 +168,10 @@ export default function Register() {
 
                 {/* Sign in link */}
                 <div className="text-center">
-                    <span className="text-base-content/60">Already have an account? </span>
+                    <span className="text-base-content/60 text-sm md:text-base">Already have an account? </span>
                     <Link
                         href={route('login')}
-                        className="link link-primary hover:link-hover font-medium"
+                        className="link link-primary text-sm md:text-base hover:link-hover font-medium"
                     >
                         Sign in
                     </Link>
