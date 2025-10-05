@@ -11,13 +11,20 @@ WORKDIR /var/www/html
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Copy and install dependencies
-COPY composer.json package.json ./
+# Copy composer files and artisan
+COPY composer.json composer.lock* package.json artisan ./
+COPY app/ ./app/
+COPY bootstrap/ ./bootstrap/
+COPY config/ ./config/
+
+# Install dependencies
 RUN composer install --no-dev --optimize-autoloader
 RUN npm install
 
-# Copy app and build
+# Copy rest of the app
 COPY . .
+
+# Build assets
 RUN npm run build
 
 # Set permissions
