@@ -14,11 +14,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Copy all files first
 COPY . .
 
-# Install dependencies without scripts first
+# Install dependencies without scripts
 RUN composer install --no-dev --no-scripts --optimize-autoloader
-
-# Run package discovery manually
-RUN php artisan package:discover --ansi || true
 
 # Install npm and build
 RUN npm install
@@ -34,4 +31,4 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-av
 
 EXPOSE 80
 
-CMD ["bash", "-c", "php artisan key:generate --force && php artisan migrate --force && apache2-foreground"]
+CMD ["bash", "-c", "touch .env && apache2-foreground"]
