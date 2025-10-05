@@ -17,8 +17,6 @@ export default function BookHeader({ book, canEdit }: BookHeaderProps) {
         name: book.name,
         description: book.description,
         budget: book.budget,
-        enable_alerts: true,
-        alert_threshold: 80,
     });
 
     const role = book.members.find((m) => m.user.id === currentUser.id)?.role || 'member';
@@ -69,8 +67,6 @@ export default function BookHeader({ book, canEdit }: BookHeaderProps) {
             name: book.name,
             description: book.description,
             budget: book.budget,
-            enable_alerts: true,
-            alert_threshold: 80,
         });
         setIsEditing(false);
         setShowDelete(false);

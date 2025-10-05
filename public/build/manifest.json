@@ -1,0 +1,160 @@
+{
+  "_AuthenticatedLayout-DeM13BqC.js": {
+    "file": "assets/AuthenticatedLayout-DeM13BqC.js",
+    "name": "AuthenticatedLayout",
+    "imports": [
+      "resources/js/app.tsx",
+      "_piggy-bank-CvFCs0x6.js",
+      "_user-pOpDKKC7.js"
+    ]
+  },
+  "_GuestLayout-CBu4QMwQ.js": {
+    "file": "assets/GuestLayout-CBu4QMwQ.js",
+    "name": "GuestLayout",
+    "imports": [
+      "_piggy-bank-CvFCs0x6.js",
+      "resources/js/app.tsx"
+    ]
+  },
+  "_budget-B78iKhM-.js": {
+    "file": "assets/budget-B78iKhM-.js",
+    "name": "budget",
+    "imports": [
+      "_piggy-bank-CvFCs0x6.js"
+    ]
+  },
+  "_mail-ChhSFwu7.js": {
+    "file": "assets/mail-ChhSFwu7.js",
+    "name": "mail",
+    "imports": [
+      "_piggy-bank-CvFCs0x6.js"
+    ]
+  },
+  "_piggy-bank-CvFCs0x6.js": {
+    "file": "assets/piggy-bank-CvFCs0x6.js",
+    "name": "piggy-bank",
+    "imports": [
+      "resources/js/app.tsx"
+    ]
+  },
+  "_save-BTK37BQN.js": {
+    "file": "assets/save-BTK37BQN.js",
+    "name": "save",
+    "imports": [
+      "_piggy-bank-CvFCs0x6.js"
+    ]
+  },
+  "_trash-2-DRPyXFvi.js": {
+    "file": "assets/trash-2-DRPyXFvi.js",
+    "name": "trash-2",
+    "imports": [
+      "_piggy-bank-CvFCs0x6.js"
+    ]
+  },
+  "_user-pOpDKKC7.js": {
+    "file": "assets/user-pOpDKKC7.js",
+    "name": "user",
+    "imports": [
+      "_piggy-bank-CvFCs0x6.js"
+    ]
+  },
+  "resources/js/Pages/Auth/Login.tsx": {
+    "file": "assets/Login-d8bH7ZgZ.js",
+    "name": "Login",
+    "src": "resources/js/Pages/Auth/Login.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_GuestLayout-CBu4QMwQ.js",
+      "_mail-ChhSFwu7.js",
+      "_piggy-bank-CvFCs0x6.js"
+    ]
+  },
+  "resources/js/Pages/Auth/Register.tsx": {
+    "file": "assets/Register-BS4Uibb9.js",
+    "name": "Register",
+    "src": "resources/js/Pages/Auth/Register.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_GuestLayout-CBu4QMwQ.js",
+      "_user-pOpDKKC7.js",
+      "_mail-ChhSFwu7.js",
+      "_piggy-bank-CvFCs0x6.js"
+    ]
+  },
+  "resources/js/Pages/Main/Book.tsx": {
+    "file": "assets/Book-COdaQeI9.js",
+    "name": "Book",
+    "src": "resources/js/Pages/Main/Book.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_AuthenticatedLayout-DeM13BqC.js",
+      "_budget-B78iKhM-.js",
+      "_save-BTK37BQN.js",
+      "_trash-2-DRPyXFvi.js",
+      "_piggy-bank-CvFCs0x6.js",
+      "_user-pOpDKKC7.js"
+    ]
+  },
+  "resources/js/Pages/Main/Dashboard.tsx": {
+    "file": "assets/Dashboard-BlO6i8cC.js",
+    "name": "Dashboard",
+    "src": "resources/js/Pages/Main/Dashboard.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_AuthenticatedLayout-DeM13BqC.js",
+      "_budget-B78iKhM-.js",
+      "_piggy-bank-CvFCs0x6.js",
+      "_mail-ChhSFwu7.js",
+      "_user-pOpDKKC7.js",
+      "_trash-2-DRPyXFvi.js"
+    ]
+  },
+  "resources/js/Pages/Profile/Profile.tsx": {
+    "file": "assets/Profile-CIb56oxH.js",
+    "name": "Profile",
+    "src": "resources/js/Pages/Profile/Profile.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_AuthenticatedLayout-DeM13BqC.js",
+      "_user-pOpDKKC7.js",
+      "_mail-ChhSFwu7.js",
+      "_save-BTK37BQN.js",
+      "_trash-2-DRPyXFvi.js",
+      "_piggy-bank-CvFCs0x6.js"
+    ]
+  },
+  "resources/js/Pages/Theme/Theme.tsx": {
+    "file": "assets/Theme-RoyxX7qj.js",
+    "name": "Theme",
+    "src": "resources/js/Pages/Theme/Theme.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_AuthenticatedLayout-DeM13BqC.js",
+      "_piggy-bank-CvFCs0x6.js",
+      "_user-pOpDKKC7.js"
+    ]
+  },
+  "resources/js/app.tsx": {
+    "file": "assets/app-D1eMK3SZ.js",
+    "name": "app",
+    "src": "resources/js/app.tsx",
+    "isEntry": true,
+    "dynamicImports": [
+      "resources/js/Pages/Auth/Login.tsx",
+      "resources/js/Pages/Auth/Register.tsx",
+      "resources/js/Pages/Main/Book.tsx",
+      "resources/js/Pages/Main/Dashboard.tsx",
+      "resources/js/Pages/Profile/Profile.tsx",
+      "resources/js/Pages/Theme/Theme.tsx"
+    ],
+    "css": [
+      "assets/app-DFYnjC4-.css"
+    ]
+  }
+}
