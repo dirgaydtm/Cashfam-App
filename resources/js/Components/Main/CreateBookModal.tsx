@@ -27,16 +27,16 @@ export default function CreateBookModal({ isOpen, onClose }: CreateBookModalProp
         e.preventDefault();
 
         // 🔴 TODO-BE: Implementasi backend untuk create book
-        // post(route('books.store'), {
-        //     onSuccess: () => {
-        //         reset();
-        //         onClose();
-        //     }
-        // });
+        post(route('books.store'), {
+            onSuccess: () => {
+                reset();
+                onClose();
+            }
+        });
 
-        console.log('Creating book with data:', data);
-        reset();
-        onClose();
+        // console.log('Creating book with data:', data);
+        // reset();
+        // onClose();
     };
 
     const handleClose = () => {

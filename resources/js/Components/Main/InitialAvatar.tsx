@@ -6,7 +6,7 @@ const Avatar = ({ username }: { username: string }) => {
         .toUpperCase() || "?"
 
     return (
-        <div className="size-full rounded-full text-3xl bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center font-bold text-white shadow-md">
+        <div className="size-full rounded-full text-base md:text-3xl bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center font-bold text-white shadow-md">
             {initial}
         </div>
     )

@@ -52,20 +52,14 @@ const Modal: React.FC<ModalProps> = ({
     };
 
     return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-            onClick={handleBackdropClick}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="modal-title"
-        >
+        <div className="modal modal-open">
             <div
                 ref={modalRef}
-                className={`bg-base-100 rounded-lg shadow-xl w-full ${sizeClasses[size]} max-h-[90vh] flex flex-col`}
+                className={`modal-box w-full ${sizeClasses[size]} max-h-[90vh]`}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-base-300">
-                    <h2 id="modal-title" className="text-xl font-semibold">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 id="modal-title" className="text-xl font-bold">
                         {title}
                     </h2>
                     {showCloseButton && (
@@ -80,10 +74,16 @@ const Modal: React.FC<ModalProps> = ({
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6">
+                <div className="overflow-y-auto">
                     {children}
                 </div>
             </div>
+
+            {/* Backdrop */}
+            <div
+                className="modal-backdrop bg-black/50"
+                onClick={onClose}
+            />
         </div>
     );
 };

@@ -7,11 +7,6 @@ import DeleteAccountForm from '@/Components/Profile/DeleteAccountForm';
 export default function Profile({ status }: PageProps<{ status?: string }>) {
     return (
         <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-base-content/90">
-                    Profile Settings
-                </h2>
-            }
         >
             <Head title="Profile" />
 

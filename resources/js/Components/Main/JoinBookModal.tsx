@@ -16,16 +16,16 @@ export default function JoinBookModal({ isOpen, onClose }: JoinBookModalProps) {
         e.preventDefault();
 
         // 🔴 TODO-BE: Implementasi backend untuk join book dengan kode
-        // post(route('books.join'), {
-        //     onSuccess: () => {
-        //         reset();
-        //         onClose();
-        //     }
-        // });
+        post(route('books.join'), {
+            onSuccess: () => {
+                reset();
+                onClose();
+            }
+        });
 
-        console.log('Joining book with code:', data.invitation_code);
-        reset();
-        onClose();
+        // console.log('Joining book with code:', data.invitation_code);
+        // reset();
+        // onClose();
     };
 
     const handleClose = () => {
