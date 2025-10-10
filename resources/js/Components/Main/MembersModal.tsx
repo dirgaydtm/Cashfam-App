@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Users, Crown, Shield, User, UserMinus, UserCheck, Mail, Copy, RefreshCw, CheckCircle } from 'lucide-react';
 import Modal from '@/Layouts/Modal';
 import { currentUser } from '@/data.js';
+import InitialAvatar from '@/Components/Main/InitialAvatar';
 import type { FinancialBook, BookMember } from '@/types';
 
 interface MembersModalProps {
@@ -218,11 +219,9 @@ export default function MembersModal({ isOpen, onClose, book }: MembersModalProp
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3 flex-1">
                                                 {/* Avatar */}
-                                                <div className="avatar placeholder">
-                                                    <div className="bg-neutral text-neutral-content rounded-full w-12">
-                                                        <span className="text-sm">
-                                                            {member.user.name.charAt(0)}
-                                                        </span>
+                                                <div className="avatar">
+                                                    <div className="w-12 h-12">
+                                                        <InitialAvatar username={member.user.name} />
                                                     </div>
                                                 </div>
 
