@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
-import type { FinancialBook, BookSettingsFormData } from '@/types';
+import type { FinancialBook } from '@/types';
 import { formatRupiah } from '@/utils/currency';
 import { getSpentPercent } from '@/utils/budget';
 import { dummyTransactions, currentUser } from '@/data';
 import { DollarSign, Edit, FileText, Save, Settings, Trash2, X } from 'lucide-react';
+
+interface BookSettingsFormData {
+    name: string;
+    description: string;
+    budget?: number;
+}
 
 interface BookHeaderProps {
     book: FinancialBook;

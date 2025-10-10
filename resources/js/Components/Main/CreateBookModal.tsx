@@ -2,7 +2,12 @@ import { useState } from 'react';
 import { useForm } from '@inertiajs/react';
 import { DollarSign, FileText } from 'lucide-react';
 import Modal from '@/Layouts/Modal';
-import type { CreateBookFormData } from '@/types';
+
+interface CreateBookFormData {
+    name: string;
+    description: string;
+    budget?: number;
+}
 
 interface CreateBookModalProps {
     isOpen: boolean;

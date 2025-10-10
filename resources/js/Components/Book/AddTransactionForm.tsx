@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
-import type { FinancialBook, TransactionFormData } from '@/types';
+import type { FinancialBook } from '@/types';
 import { transactionCategories } from '@/data';
 import { TrendingDown, TrendingUp } from 'lucide-react';
+
+interface TransactionFormData {
+    type: 'income' | 'expense';
+    category: string;
+    amount: number;
+    description: string;
+    date: string;
+}
 
 interface AddTransactionFormProps {
     book: FinancialBook;
