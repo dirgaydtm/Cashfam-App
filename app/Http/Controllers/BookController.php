@@ -7,8 +7,10 @@ use App\Models\FinancialBook;
 use App\Models\BookMember;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str; // <-- Tambahkan ini untuk membuat kode unik
 use Inertia\Inertia; // Opsional, tetapi bagus untuk konteks Inertia
+
 
 class BookController extends Controller
 {
@@ -66,5 +68,26 @@ class BookController extends Controller
             return redirect()->back()
                              ->withErrors(['general' => 'Gagal membuat buku. Silakan coba lagi.']);
         }
+    }
+
+    public function show(FinancialBook $book)
+    {
+        $user = Auth::user();
+        $book->load('members');
+        if (!$book->members->contains('user_id', $user->id)) {
+            Log::warning('Akses Ditolak ke Buku ID ' . $book->id . ' oleh User ID ' . $user->id);
+            abort(403, 'Anda tidak memiliki akses ke buku ini.');
+        }
+        
+        // Eager Load yang Dibutuhkan untuk tampilan Book
+        $book->load([
+            'creator',
+            'members.user',
+        ]);
+
+        return Inertia::render('Main/Book', [
+            'book' => $book,
+            'transactions' => [], // Masih array kosong sampai tabel transactions siap.
+        ]);
     }
 }

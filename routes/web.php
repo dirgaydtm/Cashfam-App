@@ -17,11 +17,9 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth'])
     ->name('dashboard');
 
-Route::get('/books/{book}', function (string $book) {
-    return Inertia::render('Main/Book', [
-        'bookId' => $book,
-    ]);
-})->middleware(['auth'])->name('books.show');
+Route::get('/books/{book}', [BookController::class, 'show']) 
+    ->middleware(['auth'])
+    ->name('books.show');
 
 Route::get('/theme', function () {
     return Inertia::render('Theme/Theme');

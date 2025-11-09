@@ -23,7 +23,7 @@ class FinancialBook extends Model
     }
 
     // Members (Relasi HasMany ke BookMember)
-    public function members(): HasMany
+    public function members()
     {
         return $this->hasMany(BookMember::class, 'book_id');
     }

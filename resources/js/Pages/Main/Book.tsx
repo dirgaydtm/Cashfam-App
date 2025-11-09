@@ -9,18 +9,20 @@ import BookHeader from '@/Components/Book/BookHeader';
 import TransactionsSection from '@/Components/Book/TransactionsSection';
 import AddTransactionForm from '@/Components/Book/AddTransactionForm';
 
-type PageProps = {
-    bookId: string;
-};
+// type PageProps = {
+//     bookId: string;
+// };
+interface BookPageProps {
+    book: FinancialBook; // Objek buku lengkap dari backend
+    transactions: []; // Kita kirim array kosong sementara
+}
 
 export default function BookPage() {
     const { props } = usePage();
-    const { bookId } = props as unknown as PageProps;
+    const { book, transactions } = props as unknown as BookPageProps;
 
-    const book: FinancialBook | undefined = useMemo(
-        () => dummyFinancialBooks.find((b) => b.id === String(bookId)),
-        [bookId]
-    );
+    const { auth } = usePage().props;
+    const { user } = auth;
 
     if (!book) {
         return (
@@ -35,7 +37,7 @@ export default function BookPage() {
     }
 
     const role: 'creator' | 'admin' | 'member' =
-        book.members.find((m) => m.user.id === currentUser.id)?.role || 'member';
+        book.members.find((m) => m.user.id === user.id)?.role || 'member'; // Menggunakan user.id yang benar
     const canEdit = role === 'creator' || role === 'admin';
 
     return (
