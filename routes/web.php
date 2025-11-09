@@ -35,6 +35,7 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/books/{book}', [BookController::class, 'update'])->name('books.update');
     Route::delete('/books/{book}', [BookController::class, 'destroy'])->name('books.destroy');
     Route::post('/books/join', [BookController::class, 'join'])->name('books.join');
+    Route::post('/books/{book}/leave', [BookController::class, 'leave'])->name('books.leave');
 
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');

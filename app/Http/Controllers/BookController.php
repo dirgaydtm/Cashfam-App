@@ -179,4 +179,31 @@ class BookController extends Controller
         ]);
         return redirect()->back(); 
     }
+
+    public function leave(FinancialBook $book)
+    {
+        $user = Auth::user();
+        $membership = $book->members()->where('user_id', $user->id)->first();
+
+        if (!$membership) {
+            // User sudah tidak ada di buku ini, tidak perlu tindakan lebih lanjut.
+            return back()->with('message', 'Anda sudah tidak menjadi anggota buku ini.');
+        }
+
+        if ($membership->role === 'creator') {
+            return back()->withErrors(['error' => 'Creator tidak dapat meninggalkan buku yang mereka buat. Anda harus menghapus buku atau mentransfer kepemilikan terlebih dahulu.']);
+        }
+        
+        try {
+            DB::transaction(function () use ($membership) {
+                $deleted = $membership->delete();
+                Log::info("Status penghapusan keanggotaan (1=berhasil): " . $deleted); // PENTING!
+            });
+
+            return redirect()->route('books.index')->with('success', "Anda telah berhasil meninggalkan buku '{$book->name}'.");
+        } catch (\Exception $e) {
+            Log::error("Gagal meninggalkan buku ID {$book->id}: " . $e->getMessage());
+            return back()->withErrors(['error' => 'Gagal meninggalkan buku. Silakan coba lagi.']);
+        }
+    }
 }

@@ -39,12 +39,13 @@ export default function Dashboard() {
     const transactions = props.transactions || []; 
 
 
-    const handleLeaveBookSuccess = () => {
-        router.reload({
-            only: ['userBooks', 'transactions']
-        });
-        console.log('Book left successfully, refreshing data...');
-    };
+    // const handleLeaveBookSuccess = () => {
+    //     router.reload({
+    //         only: ['userBooks', 'transactions']
+    //     });
+    //     console.log('Book left successfully, refreshing data...');
+    // };
+    
 
     const modalHandlers = {
         openCreateModal: () => setIsCreateModalOpen(true),
@@ -57,6 +58,7 @@ export default function Dashboard() {
         closeLeaveModal: () => setLeaveBook(null),
     };
 
+    
     const hasNoBooks = userBooks.length === 0;
 
     return (
@@ -151,7 +153,7 @@ export default function Dashboard() {
                 isOpen={!!leaveBook}
                 onClose={modalHandlers.closeLeaveModal}
                 book={leaveBook}
-                onSuccess={handleLeaveBookSuccess}
+                // Hapus onSuccess={handleLeaveBookSuccess}
             />
         </AuthenticatedLayout>
     );
