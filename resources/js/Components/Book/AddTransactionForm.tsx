@@ -4,19 +4,26 @@ import { transactionCategories } from '@/data';
 import { TrendingDown, TrendingUp } from 'lucide-react';
 
 interface TransactionFormData {
+    book_id: number;        
+    user_id: number;        
     type: 'income' | 'expense';
     category: string;
     amount: number;
     description: string;
     date: string;
+    status?: string;        
+    approved_by?: number;   
 }
 
 interface AddTransactionFormProps {
     book: FinancialBook;
+    userId: number;
 }
 
-export default function AddTransactionForm({ book }: AddTransactionFormProps) {
+export default function AddTransactionForm({ book, userId }: AddTransactionFormProps) {
     const [data, setData] = useState<TransactionFormData>({
+        book_id: Number(book.id),
+        user_id: userId,
         type: 'expense',
         category: '',
         amount: 0,
@@ -24,32 +31,50 @@ export default function AddTransactionForm({ book }: AddTransactionFormProps) {
         date: new Date().toISOString().split('T')[0],
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // 🔴 TODO-BE: Implementasi backend untuk create transaction
-        // post(route('transactions.store'), {
-        //     ...data,
-        //     book_id: book.id,
-        //     onSuccess: () => {
-        //         setData({
-        //             type: 'expense',
-        //             category: '',
-        //             amount: 0,
-        //             description: '',
-        //             date: new Date().toISOString().split('T')[0],
-        //         });
-        //     }
-        // });
-
-        console.log('Adding transaction:', { ...data, book_id: book.id });
-        setData({
-            type: 'expense',
-            category: '',
-            amount: 0,
-            description: '',
-            date: new Date().toISOString().split('T')[0],
-        });
+        try {
+            const response = await fetch('/api/transactions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+            if (response.ok) {
+                const result = await response.json();
+                alert('Transaksi berhasil ditambahkan');
+                setData({
+                    book_id: Number(book.id),
+                    user_id: userId,
+                    type: 'expense',
+                    category: '',
+                    amount: 0,
+                    description: '',
+                    date: new Date().toISOString().split('T')[0],
+                    status: undefined,
+                    approved_by: undefined,
+                });
+            } else {
+                const errorData = await response.json();
+                console.error('API Error:', errorData); 
+                
+                let errorMessage = 'Gagal menambahkan transaksi. Silakan coba lagi.';
+                
+                if (response.status === 422 && errorData.errors) {
+                    errorMessage = 'Gagal validasi data:\n';
+                    for (const key in errorData.errors) {
+                        errorMessage += `- ${errorData.errors[key].join(', ')}\n`;
+                    }
+                } else if (errorData.message) {
+                    errorMessage = `Gagal: ${errorData.message}`;
+                }
+                
+                alert(errorMessage);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Terjadi kesalahan jaringan');
+        }
     };
 
     return (

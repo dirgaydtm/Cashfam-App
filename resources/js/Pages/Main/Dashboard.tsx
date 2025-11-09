@@ -10,6 +10,7 @@ import MembersModal from '@/Components/Main/MembersModal';
 import BookCard from '@/Components/Main/BookCard';
 import LeaveBookModal from '@/Components/Main/LeaveBookModal';
 
+
 interface DashboardProps extends PageProps {
     userBooks?: FinancialBook[];
     transactions?: Transaction[];
@@ -28,11 +29,15 @@ export default function Dashboard() {
     // const userBooks = props.userBooks || [];
     // const transactions = props.transactions || [];
 
-    // Temporary: gunakan dummy data
-    const userBooks = dummyFinancialBooks.filter(book =>
-        book.members.some(member => member.user.id === currentUser.id)
-    );
-    const transactions = dummyTransactions;
+    // Temporary: gunakan dummy data [Jangan Lupa Hapus][Penggantinya di bawah]
+    // const userBooks = dummyFinancialBooks.filter(book =>
+    //     book.members.some(member => member.user.id === currentUser.id)
+    // );
+    // const transactions = dummyTransactions;
+
+    const userBooks = props.userBooks || [];
+    const transactions = props.transactions || []; 
+
 
     const handleLeaveBookSuccess = () => {
         router.reload({
