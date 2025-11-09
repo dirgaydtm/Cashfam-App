@@ -4,6 +4,7 @@ import { dummyTransactions, currentUser } from '@/data';
 import { formatRupiah } from '@/utils/currency';
 import { Calendar, CheckCircle, Search, TrendingDown, TrendingUp, User, X, XCircle } from 'lucide-react';
 
+
 interface TransactionsSectionProps {
     book: FinancialBook;
 }
@@ -51,7 +52,7 @@ export default function TransactionsSection({ book }: TransactionsSectionProps) 
     const [isProcessingId, setIsProcessingId] = useState<string | null>(null);
 
     const role: 'creator' | 'admin' | 'member' =
-        book.members.find((m) => m.user.id === currentUser.id)?.role || 'member';
+        book.members.find((m) => m.user.id === currentUser.id)?.role || 'creator';
     const canApproveTransactions = role === 'creator' || role === 'admin';
 
     const fetchTransactions = useCallback(async () => {
@@ -153,7 +154,7 @@ export default function TransactionsSection({ book }: TransactionsSectionProps) 
             setApiFeedback({ message: 'Terjadi kesalahan jaringan atau server saat memproses permintaan.', type: 'error' });
         } finally {
             setIsProcessingId(null);
-        }
+        }   
     };
     
     // Wrapper functions

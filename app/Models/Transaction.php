@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Transaction extends Model
 {
@@ -18,6 +19,10 @@ class Transaction extends Model
         'approved_by',
     ];
 
+    public function book(): BelongsTo
+    {
+        return $this->belongsTo(FinancialBook::class, 'book_id'); 
+    }
     
     public function approvedBy()
     {

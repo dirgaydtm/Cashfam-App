@@ -36,6 +36,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
+    
+    Route::post('/transactions/{transaction}/approve', [TransactionController::class, 'approve'])->name('transactions.approve');
+    Route::post('/transactions/{transaction}/reject', [TransactionController::class, 'reject'])->name('transactions.reject');
 });
 
 require __DIR__.'/auth.php';
