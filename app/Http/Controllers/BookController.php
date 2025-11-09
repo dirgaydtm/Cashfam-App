@@ -12,6 +12,7 @@ use Illuminate\Support\Str; // <-- Tambahkan ini untuk membuat kode unik
 use Inertia\Inertia; // Opsional, tetapi bagus untuk konteks Inertia
 use App\Http\Requests\UpdateBookRequest;
 
+
 class BookController extends Controller
 {
     public function store(Request $request)
@@ -79,22 +80,31 @@ class BookController extends Controller
             abort(403, 'Anda tidak memiliki akses ke buku ini.');
         }
         
-        // Eager Load yang Dibutuhkan untuk tampilan Book
         $book->load([
             'creator',
             'members.user',
         ]);
+        // 1. Ganti loadSum dengan perhitungan langsung menggunakan withSum
+        $totals = $book->transactions()
+            ->where('status', 'approved')
+            ->selectRaw('SUM(CASE WHEN type = "income" THEN amount ELSE 0 END) as total_income')
+            ->selectRaw('SUM(CASE WHEN type = "expense" THEN amount ELSE 0 END) as total_expenses')
+            ->first(); // Ambil hasilnya
 
-        $book->loadSum('transactions as total_income', 'amount', fn ($q) => $q->where('type', 'income'));
-        $book->loadSum('transactions as total_expenses', 'amount', fn ($q) => $q->where('type', 'expense'));
+        // 2. Siapkan data buku yang akan dikirim ke Inertia
+        $bookData = array_merge($book->toArray(), [
+            'total_income' => (int) ($totals->total_income ?? 0),
+            'total_expenses' => (int) ($totals->total_expenses ?? 0),
+            'current_balance' => (int) ($totals->total_income ?? 0) - (int) ($totals->total_expenses ?? 0),
+        ]);
+
+        // $book->loadSum('transactions as total_income', 'amount', fn ($q) => $q->where('type', 'income'));
+        // $book->loadSum('transactions as total_expenses', 'amount', fn ($q) => $q->where('type', 'expense'));
 
         return Inertia::render('Main/Book', [
-            'book' => $book,
-            'transactions' => [], // Masih array kosong sampai tabel transactions siap.
-            'book' => array_merge($book->toArray(), [
-            'total_income' => $book->total_income ?? 0,
-            'total_expenses' => $book->total_expenses ?? 0,
-        ]),
+            'book' => $bookData, // Kirim data yang sudah di-merge
+            'transactions' => [], 
+            // Anda mungkin ingin menempatkan perhitungan di atas ke dalam $bookData
         ]);
     }
 
