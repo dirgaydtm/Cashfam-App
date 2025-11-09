@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TransactionController;
 
 Route::get('/', function () {
     return Auth::check()
@@ -31,6 +32,9 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::post('/books', [BookController::class, 'store'])->name('books.store');
+
+    Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
+    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
 });
 
 require __DIR__.'/auth.php';

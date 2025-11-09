@@ -9,9 +9,7 @@ import BookHeader from '@/Components/Book/BookHeader';
 import TransactionsSection from '@/Components/Book/TransactionsSection';
 import AddTransactionForm from '@/Components/Book/AddTransactionForm';
 
-// type PageProps = {
-//     bookId: string;
-// };
+
 interface BookPageProps {
     book: FinancialBook; // Objek buku lengkap dari backend
     transactions: []; // Kita kirim array kosong sementara
@@ -21,8 +19,7 @@ export default function BookPage() {
     const { props } = usePage();
     const { book, transactions } = props as unknown as BookPageProps;
 
-    const { auth } = usePage().props;
-    const { user } = auth;
+    const { user } = props.auth;
 
     if (!book) {
         return (
@@ -39,6 +36,8 @@ export default function BookPage() {
     const role: 'creator' | 'admin' | 'member' =
         book.members.find((m) => m.user.id === user.id)?.role || 'member'; // Menggunakan user.id yang benar
     const canEdit = role === 'creator' || role === 'admin';
+
+    const currentUserId = user.id;
 
     return (
         <AuthenticatedLayout
@@ -58,11 +57,11 @@ export default function BookPage() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2">
-                        <TransactionsSection book={book} />
+                        <TransactionsSection book={book} transactions={transactions} /> 
                     </div>
 
                     <div>
-                        <AddTransactionForm book={book} />
+                        <AddTransactionForm book={book} userId={currentUserId} />
                     </div>
                 </div>
             </div>

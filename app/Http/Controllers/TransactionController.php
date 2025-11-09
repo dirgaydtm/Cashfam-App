@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Transaction;
+use Illuminate\Support\Facades\Auth;
 
 
 class TransactionController extends Controller
@@ -28,7 +29,7 @@ class TransactionController extends Controller
             'user_id' => 'required|integer',
             'type' => 'required|in:income,expense',
             'category' => 'required|string',
-            'amount' => 'required|numeric',
+            'amount' => 'required|numeric|min:0.01', // Tambahkan min value
             'description' => 'required|string',
             'date' => 'required|date',
         ]);
