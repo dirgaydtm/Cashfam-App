@@ -32,6 +32,8 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::post('/books', [BookController::class, 'store'])->name('books.store');
+    Route::patch('/books/{book}', [BookController::class, 'update'])->name('books.update');
+    Route::delete('/books/{book}', [BookController::class, 'destroy'])->name('books.destroy');
     Route::post('/books/join', [BookController::class, 'join'])->name('books.join');
 
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');

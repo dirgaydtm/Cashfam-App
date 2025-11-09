@@ -1,8 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
-import { useMemo } from 'react';
-import { usePage } from '@inertiajs/react';
-import { dummyFinancialBooks, currentUser } from '@/data';
+import { Head, usePage } from '@inertiajs/react';
 import type { FinancialBook } from '@/types';
 import { X } from 'lucide-react';
 import BookHeader from '@/Components/Book/BookHeader';
@@ -10,16 +7,21 @@ import TransactionsSection from '@/Components/Book/TransactionsSection';
 import AddTransactionForm from '@/Components/Book/AddTransactionForm';
 
 
+
 interface BookPageProps {
-    book: FinancialBook; // Objek buku lengkap dari backend
-    transactions: []; // Kita kirim array kosong sementara
+    book: FinancialBook & {
+        total_expenses: number; // Data ini harus dikirim dari Backend
+        total_income: number;   // Data ini harus dikirim dari Backend
+    };
+    transactions: any[]; // Kita kirim array kosong sementara
+    // Properti Inertia lainnya seperti auth
+    auth: { user: { id: number; name: string; email: string; } };
 }
 
 export default function BookPage() {
-    const { props } = usePage();
-    const { book, transactions } = props as unknown as BookPageProps;
-
-    const { user } = props.auth;
+    const { book, transactions, auth } = usePage().props as unknown as BookPageProps;
+    
+    const { user } = auth;
 
     if (!book) {
         return (

@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import type { FinancialBook } from '@/types';
 import { formatRupiah } from '@/utils/currency';
 import { getSpentPercent } from '@/utils/budget';
-import { dummyTransactions, currentUser } from '@/data';
-import { DollarSign, Edit, FileText, Save, Settings, Trash2, X } from 'lucide-react';
+import { currentUser } from '@/data';
+import { DollarSign, FileText, Save, Settings, Trash2 } from 'lucide-react';
+import { useForm } from '@inertiajs/react';
 
 interface BookSettingsFormData {
     name: string;
@@ -12,67 +13,68 @@ interface BookSettingsFormData {
 }
 
 interface BookHeaderProps {
-    book: FinancialBook;
+    book: FinancialBook& {
+        total_expenses: number;
+        total_income: number;
+    };
     canEdit: boolean;
 }
 
 export default function BookHeader({ book, canEdit }: BookHeaderProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [showDelete, setShowDelete] = useState(false);
-    const [data, setData] = useState<BookSettingsFormData>({
+
+    const initialBudget = (book.budget === null || book.budget === undefined) ? undefined : book.budget;
+    
+    const { data, setData, patch, delete: destroy, processing, errors } = useForm<BookSettingsFormData>({
         name: book.name,
         description: book.description,
-        budget: book.budget,
+        budget: initialBudget, // Gunakan nilai yang sudah dinormalisasi
     });
 
     const role = book.members.find((m) => m.user.id === currentUser.id)?.role || 'member';
 
     // 🔴 TODO-BE: totalExpenses dan totalIncome seharusnya dari backend
-    const totalExpenses = dummyTransactions
-        .filter((t) => t.book_id === book.id && t.status === 'approved' && t.type === 'expense')
-        .reduce((s, t) => s + t.amount, 0);
-
-    const totalIncome = dummyTransactions
-        .filter((t) => t.book_id === book.id && t.status === 'approved' && t.type === 'income')
-        .reduce((s, t) => s + t.amount, 0);
+    const totalExpenses = Number(book.total_expenses || 0); // Konversi paksa ke Number
+    const totalIncome = Number(book.total_income || 0);     // Konversi paksa ke Number
 
     const netBalance = totalIncome - totalExpenses;
-    const spentPercent = getSpentPercent(totalExpenses, book.budget);
+    const spentPercent = getSpentPercent(totalExpenses, book.budget);    
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!canEdit) return;
 
         // 🔴 TODO-BE: Implementasi backend untuk update book settings
-        // post(route('books.update', book.id), {
-        //     ...data,
-        //     onSuccess: () => {
-        //         setIsEditing(false);
-        //     }
-        // });
-
-        console.log('Save book settings:', { ...data, id: book.id });
-        setIsEditing(false);
+        patch(route('books.update', book.id), {
+            onSuccess: () => {
+                setIsEditing(false); // Tutup form setelah sukses
+            },
+            onError: (err) => {
+                console.error("Update failed:", err);
+            },
+        });
     };
 
     const handleDelete = () => {
         if (role !== 'creator') return;
 
         // 🔴 TODO-BE: Implementasi backend untuk delete book
-        // router.delete(route('books.destroy', book.id), {
-        //     onSuccess: () => {
-        //         router.visit('/dashboard');
-        //     }
-        // });
-
-        console.log('Delete book:', book.id);
+        destroy(route('books.destroy', book.id), {
+            onSuccess: () => {
+                console.log('Book deleted successfully');
+            },
+            onError: (err) => {
+                console.error("Delete failed:", err);
+            },
+        });
     };
 
     const handleCancel = () => {
         setData({
             name: book.name,
             description: book.description,
-            budget: book.budget,
+            budget: initialBudget,
         });
         setIsEditing(false);
         setShowDelete(false);
@@ -95,7 +97,7 @@ export default function BookHeader({ book, canEdit }: BookHeaderProps) {
                                             type="text"
                                             className="input input-bordered w-full pl-10"
                                             value={data.name}
-                                            onChange={(e) => setData({ ...data, name: e.target.value })}
+                                            onChange={(e) => setData('name', e.target.value)}
                                             required
                                         />
                                         <FileText className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" size={18} />
@@ -109,7 +111,7 @@ export default function BookHeader({ book, canEdit }: BookHeaderProps) {
                                     <textarea
                                         className="textarea textarea-bordered w-full"
                                         value={data.description}
-                                        onChange={(e) => setData({ ...data, description: e.target.value })}
+                                        onChange={(e) => setData('description', e.target.value)}
                                         rows={2}
                                     />
                                 </div>
@@ -127,7 +129,7 @@ export default function BookHeader({ book, canEdit }: BookHeaderProps) {
                                             placeholder="Leave empty for no budget limit"
                                             className="input input-bordered w-full pl-10"
                                             value={data.budget || ''}
-                                            onChange={(e) => setData({ ...data, budget: e.target.value ? Number(e.target.value) : undefined })}
+                                            onChange={(e) => setData('budget', e.target.value ? Number(e.target.value) : undefined)}
                                             min={0}
                                             step={1000}
                                         />

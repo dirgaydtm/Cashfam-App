@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str; // <-- Tambahkan ini untuk membuat kode unik
 use Inertia\Inertia; // Opsional, tetapi bagus untuk konteks Inertia
-
+use App\Http\Requests\UpdateBookRequest;
 
 class BookController extends Controller
 {
@@ -85,9 +85,16 @@ class BookController extends Controller
             'members.user',
         ]);
 
+        $book->loadSum('transactions as total_income', 'amount', fn ($q) => $q->where('type', 'income'));
+        $book->loadSum('transactions as total_expenses', 'amount', fn ($q) => $q->where('type', 'expense'));
+
         return Inertia::render('Main/Book', [
             'book' => $book,
             'transactions' => [], // Masih array kosong sampai tabel transactions siap.
+            'book' => array_merge($book->toArray(), [
+            'total_income' => $book->total_income ?? 0,
+            'total_expenses' => $book->total_expenses ?? 0,
+        ]),
         ]);
     }
 
@@ -149,5 +156,17 @@ class BookController extends Controller
                 'message' => 'Gagal bergabung ke buku karena kesalahan server.'
             ], 500);
         }
+    }
+
+    public function update(UpdateBookRequest $request, FinancialBook $book)
+    {
+        $validated = $request->validated();
+
+        $book->update([
+            'name' => $validated['name'],
+            'description' => $validated['description'],
+            'budget' => $validated['budget'], // Cukup gunakan nilai dari $validated
+        ]);
+        return redirect()->back(); 
     }
 }
