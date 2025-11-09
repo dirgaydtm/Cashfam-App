@@ -90,4 +90,64 @@ class BookController extends Controller
             'transactions' => [], // Masih array kosong sampai tabel transactions siap.
         ]);
     }
+
+    public function join(Request $request)
+    {
+        // 1. Validasi Input (Pastikan kode 8 karakter)
+        $validated = $request->validate([
+            'invitation_code' => 'required|string|size:8',
+        ]);
+
+        $user = Auth::user();
+        $code = strtoupper($validated['invitation_code']); // Pastikan kode dalam huruf besar
+
+        // 2. Cari Buku Berdasarkan Kode Undangan
+        $book = FinancialBook::where('invitation_code', $code)->first();
+
+        if (!$book) {
+            // Jika buku tidak ditemukan, kirim respons 422 (Unprocessable Entity)
+            return response()->json([
+                'message' => 'Kode undangan tidak valid.',
+                'errors' => ['invitation_code' => ['Kode undangan tidak ditemukan.']]
+            ], 422);
+        }
+
+        // 3. Periksa apakah pengguna sudah menjadi anggota
+        $isMember = BookMember::where('book_id', $book->id)
+                              ->where('user_id', $user->id)
+                              ->exists();
+
+        if ($isMember) {
+            // Jika sudah menjadi anggota, kirim respons 422
+            return response()->json([
+                'message' => 'Anda sudah menjadi anggota buku ini.',
+                'errors' => ['invitation_code' => ['Anda sudah menjadi anggota buku ini.']]
+            ], 422);
+        }
+
+        try {
+            // 4. Tambahkan pengguna sebagai anggota baru (role: member)
+            BookMember::create([
+                'book_id' => $book->id,
+                'user_id' => $user->id,
+                'role' => 'member',
+                'joined_at' => now(),
+            ]);
+
+            // 5. Sukses: Kirim respons JSON dengan ID buku
+            return response()->json([
+                'message' => 'Berhasil bergabung ke buku keuangan.',
+                'book_id' => $book->id,
+            ], 200);
+
+        } catch (\Exception $e) {
+            // Log error jika ada masalah database
+            Log::error('Book join failed for user ' . $user->id . ': ' . $e->getMessage());
+            
+            // Kirim respons 500 Internal Server Error
+            return response()->json([
+                'message' => 'Gagal bergabung ke buku karena kesalahan server.'
+            ], 500);
+        }
+    }
 }

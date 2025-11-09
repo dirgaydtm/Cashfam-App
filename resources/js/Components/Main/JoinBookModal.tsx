@@ -1,36 +1,97 @@
 import { useForm } from '@inertiajs/react';
-import { Key } from 'lucide-react';
+import { Key, X, CheckCircle, XCircle } from 'lucide-react';
 import Modal from '@/Layouts/Modal';
+import React, { useState, useCallback } from 'react';
 
 interface JoinBookModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onSuccess?: (bookId: string) => void;
 }
+const getCsrfToken = (): string => {
+    const match = document.cookie.match(new RegExp('(^| )XSRF-TOKEN=([^;]+)'));
+    if (match) {
+        return decodeURIComponent(match[2]);
+    }
+    console.error('CSRF token not found. Authentication might fail.');
+    return '';
+};
 
-export default function JoinBookModal({ isOpen, onClose }: JoinBookModalProps) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        invitation_code: '',
-    });
+export default function JoinBookModal({ isOpen, onClose, onSuccess }: JoinBookModalProps) {
+    const [invitationCode, setInvitationCode] = useState('');
+    const [processing, setProcessing] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [feedback, setFeedback] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const resetForm = useCallback(() => {
+        setInvitationCode('');
+        setErrors({});
+        setFeedback(null);
+    }, []);
+
+    const handleClose = useCallback(() => {
+        if (processing) return;
+        resetForm();
+        onClose();
+    }, [processing, onClose, resetForm]);
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // 🔴 TODO-BE: Implementasi backend untuk join book dengan kode
-        post(route('books.join'), {
-            onSuccess: () => {
-                reset();
-                onClose();
+        // Client-side basic validation
+        if (invitationCode.length !== 8) {
+            setErrors({ invitation_code: 'Kode undangan harus 8 karakter.' });
+            return;
+        }
+
+        setProcessing(true);
+        setErrors({});
+        setFeedback(null);
+
+        try {
+            // Panggilan API NYATA ke endpoint Laravel
+            const csrfToken = getCsrfToken();
+            
+            // Asumsi URL API adalah '/books/join'
+            const apiUrl = '/books/join'; 
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-XSRF-TOKEN': csrfToken, // Mengirim CSRF token
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ invitation_code: invitationCode }),
+            });
+
+            // Mendapatkan respons JSON
+            const result = await response.json();
+
+            if (response.ok) {
+                // Status code 2xx (Success)
+                setFeedback({ type: 'success', message: 'Anda berhasil bergabung dengan Buku Keuangan!' });
+                if (onSuccess && result.book_id) {
+                    // Asumsi server mengembalikan { book_id: '...' } saat sukses
+                    onSuccess(result.book_id);
+                }
+                resetForm(); 
+                // Tutup modal setelah penundaan singkat agar pengguna melihat pesan sukses
+                setTimeout(onClose, 1500); 
+            } else if (response.status === 422 && result.errors) {
+                 // Status code 422 (Validation error)
+                setFeedback({ type: 'error', message: 'Ada kesalahan dalam data yang Anda kirim.' });
+                setErrors(result.errors);
+            } else {
+                // Status code 4xx atau 5xx lainnya (General error)
+                setFeedback({ type: 'error', message: result.message || 'Gagal bergabung ke buku. Periksa koneksi atau kode undangan.' });
             }
-        });
 
-        // console.log('Joining book with code:', data.invitation_code);
-        // reset();
-        // onClose();
-    };
-
-    const handleClose = () => {
-        reset();
-        onClose();
+        } catch (err) {
+            setFeedback({ type: 'error', message: 'Terjadi kesalahan jaringan atau server.' });
+        } finally {
+            setProcessing(false);
+        }
     };
 
     return (
@@ -45,8 +106,11 @@ export default function JoinBookModal({ isOpen, onClose }: JoinBookModalProps) {
                             type="text"
                             placeholder="Masukkan kode undangan"
                             className={`input input-bordered w-full pl-10 uppercase ${errors.invitation_code ? 'input-error' : ''}`}
-                            value={data.invitation_code}
-                            onChange={(e) => setData('invitation_code', e.target.value.toUpperCase())}
+                            value={invitationCode}
+                            onChange={(e) => {
+                                setInvitationCode(e.target.value.toUpperCase());
+                                if (errors.invitation_code) setErrors({});
+                            }}
                             maxLength={8}
                             required
                         />
@@ -75,7 +139,7 @@ export default function JoinBookModal({ isOpen, onClose }: JoinBookModalProps) {
                     <button
                         type="submit"
                         className="btn btn-primary"
-                        disabled={processing || data.invitation_code.length < 8}
+                        disabled={processing || invitationCode.length !== 8}
                     >
                         {processing && <span className="loading loading-spinner loading-sm"></span>}
                         Gabung

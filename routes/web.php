@@ -32,6 +32,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::post('/books', [BookController::class, 'store'])->name('books.store');
+    Route::post('/books/join', [BookController::class, 'join'])->name('books.join');
 
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
