@@ -10,22 +10,22 @@ import AddTransactionForm from '@/Components/Book/AddTransactionForm';
 
 interface BookPageProps {
     book: FinancialBook & {
-        total_expenses: number; // Data ini harus dikirim dari Backend
-        total_income: number;   // Data ini harus dikirim dari Backend
+        total_expenses: number;
+        total_income: number;
+        current_balance: number;
+        budget: number | null;
     };
-    transactions: any[]; // Kita kirim array kosong sementara
     // Properti Inertia lainnya seperti auth
     auth: { user: { id: number; name: string; email: string; } };
 }
 
 export default function BookPage() {
-    const { book, transactions, auth } = usePage().props as unknown as BookPageProps;
-    
+    const { book, auth } = usePage().props as unknown as BookPageProps;
     const { user } = auth;
 
     if (!book) {
         return (
-            <AuthenticatedLayout header={<h2 className="text-xl font-semibold">Book</h2>}>
+            <AuthenticatedLayout>
                 <Head title="Book" />
                 <div className="alert alert-error mt-6">
                     <X />
@@ -35,31 +35,28 @@ export default function BookPage() {
         );
     }
 
-    const role: 'creator' | 'admin' | 'member' =
-        book.members.find((m) => m.user.id === user.id)?.role || 'member'; // Menggunakan user.id yang benar
-    const canEdit = role === 'creator' || role === 'admin';
+    // Pastikan properti yang dibutuhkan BookHeader ada (fallback jika BE belum kirim)
+    const bookForHeader = {
+        ...book,
+        current_balance: book.current_balance ?? (book.total_income - book.total_expenses),
+        budget: book.budget ?? null,
+    };
 
+    const role: 'creator' | 'admin' | 'member' =
+        book.members.find((m) => m.user.id === user.id)?.role || 'member';
+    const canEdit = role === 'creator' || role === 'admin';
     const currentUserId = user.id;
 
     return (
-        <AuthenticatedLayout
-            header={
-                <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold leading-tight text-base-content/90">{book.name}</h2>
-                    <div className="badge">
-                        {role === 'creator' ? 'Creator' : role === 'admin' ? 'Admin' : 'Member'}
-                    </div>
-                </div>
-            }
-        >
+        <AuthenticatedLayout>
             <Head title={`Book • ${book.name}`} />
 
             <div className="space-y-6">
-                <BookHeader book={book} canEdit={canEdit} />
+                <BookHeader book={bookForHeader} canEdit={canEdit} />
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2">
-                        <TransactionsSection book={book} transactions={transactions} /> 
+                        <TransactionsSection book={book} />
                     </div>
 
                     <div>
