@@ -98,7 +98,7 @@ const Navbar = ({ onCreateBook, onJoinBook }: NavbarProps) => {
                     >
                         <InitialAvatar username={user.name} className="text-base md:text-3xl" />
                     </div>
-                    <ul className="menu menu-sm dropdown-content mt-4 p-0 z-[1] border bg-base-100 rounded-box pb-3 md:w-72">
+                    <ul className="menu menu-sm dropdown-content mt-4 p-0 z-[1] shadow-lg bg-base-100 rounded-box pb-3 md:w-72">
                         <li className="menu-title m-2">
                             <span className='text-base text-base-content/90'>{user.name}</span>
                             <span className="text-xs text-base-content/60">{user.email}</span>

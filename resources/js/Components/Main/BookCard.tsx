@@ -1,4 +1,4 @@
-import { LogOut, MoreVertical, TrendingDown, TrendingUp, Users, Trash2 } from "lucide-react";
+import { LogOut, MoreVertical, TrendingDown, TrendingUp, Users, Trash2, Crown, UserStar, User } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { FinancialBook } from "@/types";
 import { formatRupiah } from "@/utils/currency";
@@ -49,37 +49,6 @@ const BookCard: React.FC<BookCardProps> = ({
         () => book.members.find((m) => m.user.id === currentUserId)?.role,
         [book.members, currentUserId]
     );
-
-    // 🔴 TODO-BE: Filter & calculation di bawah ini SEHARUSNYA DILAKUKAN DI BACKEND
-    // Backend seharusnya sudah kirim book.total_income & book.total_expense
-    // Sehingga frontend tidak perlu filter & calculate manual
-
-    // 🔴 BACKEND: Ini tidak efisien, FE menerima SEMUA transactions lalu di-filter per book
-    // const bookTransactions = useMemo(
-    //     () => transactions.filter((t) => t.book_id === book.id && t.status === "approved"),
-    //     [transactions, book.id]
-    // );
-
-    // // 🔴 BACKEND: Calculation ini seharusnya dilakukan di BE menggunakan SQL SUM()
-    // const { income: totalIncome, expense: totalExpenses } = useMemo(() => {
-    //     return bookTransactions.reduce(
-    //         (acc, t) => {
-    //             if (t.type === "income") {
-    //                 acc.income += t.amount;
-    //             } else if (t.type === "expense") {
-    //                 acc.expense += t.amount;
-    //             }
-    //             return acc;
-    //         },
-    //         { income: 0, expense: 0 }
-    //     );
-    // }, [bookTransactions]);
-
-    // ✅ SETELAH IMPLEMENTASI BE, ganti menjadi:
-    // const totalIncome = book.total_income;
-    // const totalExpenses = book.total_expense;
-    // 🔴 END TODO-BE
-
 
     const totalIncome = total_income ?? 0;
     const totalExpenses = total_expenses ?? 0;
@@ -160,66 +129,71 @@ const BookCard: React.FC<BookCardProps> = ({
         }
     };
 
-    const getRoleDisplayText = () => {
+
+        const getRoleIcon = (): JSX.Element => {
         switch (userRole) {
             case "creator":
-                return "Creator";
+                return <Crown size={16} />;
             case "admin":
-                return "Admin";
+                return <UserStar size={16} />;
             default:
-                return "Member";
+                return <User size={16} />;
         }
     };
 
     return (
         <div
-            className="card bg-base-200 shadow-xl hover:shadow-2xl transition-shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/60"
+            className="card border border-base-content/30 hover:shadow-xl hover:-translate-y-1 transition-all duration-200 ease-in-out cursor-pointer"
             role="button"
             tabIndex={0}
             aria-label={`Open transactions for book ${book.name}`}
             onClick={handleCardClick}
-            onKeyDown={handleKeyDown}
         >
-            <div className="card-body">
-                <div className="flex justify-between items-start" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex flex-col w-[95%]">
-                        <h3 className="card-title text-lg">
-                            {book.name}
+            <div className="card-header card bg-base-100 md:bg-primary-content pl-5 py-3">
+                <div
+                    className="flex justify-between items-start"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div className="flex flex-1 flex-col">
+                        <h3 className="card-title flex items-center justify-between text-lg">
+                            <span className="truncate max-w-[16rem] md:max-w-[15rem] lg:max-w-[11rem]">{book.name}</span>
                             <div className={`badge ${getRoleBadgeClass()}`}>
-                                {getRoleDisplayText()}
+                                <p className="hidden lg:flex">
+                                    {userRole ? userRole.charAt(0).toUpperCase() + userRole.slice(1) : ""}
+                                </p>
+                                {getRoleIcon()}
                             </div>
                         </h3>
-                        <p className="text-base-content/60 text-sm h-12 line-clamp-2">
+                        <p className="text-base-content/60 text-xs md:text-sm h-10 line-clamp-2">
                             {book.description}
                         </p>
                     </div>
 
-                    <div
-                        className="w-[5%] dropdown dropdown-end"
-                        onClick={(e) => e.stopPropagation()}
-                        onKeyDown={(e) => e.stopPropagation()}
-                    >
-                        <MoreVertical
+                    <div className="dropdown dropdown-end">
+                        <label
                             tabIndex={0}
                             role="button"
-                            aria-haspopup="menu"
-                            aria-label="Book menu"
-                            className="size-6 btn btn-ghost btn-sm btn-circle"
-                        />
+                            onClick={e => e.stopPropagation()}
+                            className="btn btn-ghost bg-transparent border-0 btn-circle"
+                        >
+                            <MoreVertical className="size-6" />
+                        </label>
                         <ul
-                            className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+                            tabIndex={0}
+                            className="dropdown-content z-[1] menu p-0 shadow-xl bg-base-100  rounded-box w-52 mt-1"
                             role="menu"
+                            onClick={e => e.stopPropagation()}
                         >
                             {menuActions
                                 .filter((a) => !a.visible || a.visible())
                                 .map((action) => (
                                     <li key={action.key} role="none">
                                         <button
-                                            onClick={(evt) => {
+                                            onClick={evt => {
                                                 evt.stopPropagation();
                                                 action.onClick(book);
                                             }}
-                                            className={action.className}
+                                            className={`p-3 ${action.className}`}
                                             role="menuitem"
                                             type="button"
                                         >
@@ -232,8 +206,10 @@ const BookCard: React.FC<BookCardProps> = ({
                     </div>
                 </div>
 
+            </div>
+            <div className="hidden md:flex card-body gap-6 p-5">
                 {book.budget && (
-                    <div className="mb-4">
+                    <div className="hidden lg:flex flex-col">
                         <div className="flex justify-between text-xs lg:text-sm mb-1">
                             <span>Budget</span>
                             <span>{formatRupiah(budget)}</span>
@@ -241,7 +217,7 @@ const BookCard: React.FC<BookCardProps> = ({
                         <progress
                             className="progress progress-primary w-full"
                             value={totalExpenses}
-                            max={book.budget}
+                            max={budget}
                             aria-label={`Budget spent: ${spentPercent}%`}
                         />
                         <div className="flex justify-between text-xs text-base-content/60 mt-1">
@@ -269,4 +245,3 @@ const BookCard: React.FC<BookCardProps> = ({
 };
 
 export default BookCard;
-// Ini Belum
