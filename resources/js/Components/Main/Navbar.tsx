@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { PiggyBank, UserIcon, Palette, LogOut, Home, Plus, RectangleEllipsis } from 'lucide-react';
+import { UserIcon, Palette, LogOut, Home, Plus, RectangleEllipsis } from 'lucide-react';
 import { Link, usePage } from '@inertiajs/react';
 import { User , PageProps } from '@/types';
 import InitialAvatar from './InitialAvatar';
@@ -62,7 +62,16 @@ const Navbar = ({ onCreateBook, onJoinBook }: NavbarProps) => {
             {/* Logo Section */}
             <div className="navbar-start">
                 <Link href={route('dashboard')} className='flex justify-start items-center gap-2 m-2 hover:opacity-80 transition-opacity'>
-                    <PiggyBank className='size-6 md:size-8 text-primary' />
+                    {/* Replace the icon with a custom logo image. Place your image file into `public/images/` with the exact filename below. */}
+                    <img
+                        src="/images/WhatsApp_Image_2025-10-14_at_08.23.25_01803d64__1_-removebg-preview.png"
+                        alt="CashFam logo"
+                        className="w-8 md:w-18 object-contain"
+                        onError={(e) => { /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+                            // @ts-ignore
+                            e.currentTarget.src = '/images/logo-fallback.png';
+                        }}
+                    />
                     <h1 className="text-base md:text-2xl font-bold text-primary">CASHFAM</h1>
                 </Link>
             </div>
