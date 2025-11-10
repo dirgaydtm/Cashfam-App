@@ -30,7 +30,7 @@ class UpdateBookRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
 
             // Deskripsi bersifat opsional (nullable)
-            'description' => ['nullable', 'string', 'max:500'],
+            'description' => ['nullable', 'string', 'max:500']  ,
 
             // Budget bersifat opsional (nullable). 
             // Jika ada, harus berupa angka (numeric) dan minimal 0.

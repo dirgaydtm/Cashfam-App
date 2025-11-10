@@ -10,11 +10,27 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str; // <-- Tambahkan ini untuk membuat kode unik
 use Inertia\Inertia; // Opsional, tetapi bagus untuk konteks Inertia
+use Illuminate\Validation\ValidationException;
 use App\Http\Requests\UpdateBookRequest;
+use App\Http\Requests\UpdateBookMemberRequest;
 
 
 class BookController extends Controller
 {
+    protected function authorizeCreator(FinancialBook $book)
+    {
+        $user = Auth::user();
+
+        if ($book->creator_id !== $user->id) {
+            Log::warning("Akses Ditolak: User ID {$user->id} mencoba melakukan aksi Creator pada Buku ID {$book->id}.");
+            if (request()->wantsJson() || request()->is('api/*') || request()->inertia()) {
+                 abort(403, 'Hanya pembuat buku yang dapat melakukan aksi ini.');
+            }
+            return false;
+        }
+        return true;
+    }
+
     public function store(Request $request)
     {
         Log::info('Data diterima dari modal:', $request->all());
@@ -170,14 +186,56 @@ class BookController extends Controller
 
     public function update(UpdateBookRequest $request, FinancialBook $book)
     {
+        // 1. Cek apakah ini rute nested untuk anggota (books.members.update)
+        if ($request->route()->getName() === 'books.members.update') {
+            
+            // Resolve UpdateBookMemberRequest secara eksplisit untuk validasi anggota
+            $memberRequest = app(UpdateBookMemberRequest::class);
+            
+            // Panggil fungsi internal untuk mengelola peran
+            return $this->updateMemberRole($memberRequest, $book, $request->route('member'));
+        }
+
+        // 2. Ini adalah update detail buku standar (books.update)
+        $this->authorizeCreator($book);
+
         $validated = $request->validated();
 
         $book->update([
             'name' => $validated['name'],
             'description' => $validated['description'],
-            'budget' => $validated['budget'], // Cukup gunakan nilai dari $validated
+            'budget' => $validated['budget'],
         ]);
-        return redirect()->back(); 
+
+        return redirect()->back()->with('success', 'Detail buku berhasil diperbarui.');
+    }
+
+
+    public function destroy(FinancialBook $book, BookMember $member)
+    {
+        // Pastikan ini adalah rute penghapusan anggota
+        if (request()->route()->getName() !== 'books.members.destroy') {
+             abort(404);
+        }
+
+        $this->authorizeCreator($book);
+        
+        if ($member->book_id !== $book->id) {
+            return back()->withErrors(['error' => 'Anggota tidak valid untuk buku ini.']);
+        }
+
+        if ($member->role === 'creator') {
+            return back()->withErrors(['error' => 'Creator tidak dapat dihapus dari buku.']);
+        }
+
+        try {
+            $member->delete();
+            return back()->with('success', 'Anggota berhasil dihapus dari buku.');
+
+        } catch (\Exception $e) {
+            Log::error("Failed to remove member ID {$member->user_id}: " . $e->getMessage());
+            return back()->withErrors(['error' => 'Gagal menghapus anggota.']);
+        }
     }
 
     public function leave(FinancialBook $book)
@@ -206,4 +264,116 @@ class BookController extends Controller
             return back()->withErrors(['error' => 'Gagal meninggalkan buku. Silakan coba lagi.']);
         }
     }
+
+    public function regenerateInvitation(FinancialBook $book)
+    {
+        // Otorisasi: Hanya Creator yang bisa me-regenerate kode
+        if (Auth::id() !== $book->creator_id) {
+            throw ValidationException::withMessages([
+                'invitation_code' => 'Hanya pembuat buku (creator) yang diizinkan untuk me-regenerate kode undangan.'
+            ]);
+        }
+
+        // Buat kode baru (asumsi helper/fungsi membuat kode unik ada)
+        do {
+            $newCode = Str::random(8); // Gunakan 8 karakter untuk konsistensi
+        } while (FinancialBook::where('invitation_code', $newCode)->exists());
+
+        $book->invitation_code = $newCode; 
+        $book->save();
+
+        // Redirect/Inertia response untuk pembaruan
+        // Asumsikan Anda ingin me-reload prop 'book'
+        return redirect()->back()->with('success', 'Kode undangan berhasil diperbarui!');
+    }
+    
+    public function updateMember(UpdateBookMemberRequest $request, FinancialBook $book, BookMember $member)
+    {
+        return $this->updateMemberRole($request, $book, $member);
+    }
+
+    public function destroyMember(FinancialBook $book, BookMember $member)
+    {
+        $currentUserMember = $book->members()->where('user_id', Auth::id())->first();
+        
+        if (!$currentUserMember) {
+            throw ValidationException::withMessages(['member' => 'Anda bukan anggota buku ini.']);
+        }
+
+        // 1. Pencegahan Penghapusan Diri Sendiri
+        if ($member->user_id === Auth::id()) {
+            throw ValidationException::withMessages(['member' => 'Anda tidak dapat menghapus diri sendiri. Silakan tinggalkan buku ini melalui pengaturan yang sesuai.']);
+        }
+
+        // 2. Otorisasi (Admin atau Creator)
+        $isRequesterCreator = $currentUserMember->role === 'creator';
+        $isRequesterAdminOrCreator = $isRequesterCreator || $currentUserMember->role === 'admin';
+
+        if (!$isRequesterAdminOrCreator) {
+            throw ValidationException::withMessages(['member' => 'Anda tidak memiliki hak untuk menghapus anggota.']);
+        }
+
+        // 3. Pencegahan Penghapusan Creator
+        if ($member->role === 'creator') {
+             throw ValidationException::withMessages(['member' => 'Anda tidak dapat menghapus pembuat buku (creator).']);
+        }
+        
+        // 4. Pencegahan Admin Menghapus satu-satunya Admin/Creator yang tersisa (Logika frontend Anda)
+        $approverCount = $book->members()->whereIn('role', ['creator', 'admin'])->count();
+        if ($member->role === 'admin' && $approverCount <= 1) {
+             throw ValidationException::withMessages(['member' => 'Tidak dapat menghapus admin terakhir. Buku harus memiliki setidaknya satu admin atau creator.']);
+        }
+
+        // Lakukan penghapusan
+        $member->delete();
+
+        return redirect()->back()->with('success', "Anggota **{$member->user->name}** berhasil dihapus dari buku.");
+    }
+    /**
+     * INTERNAL: Menangani Promote dan Demote Anggota.
+     * @param UpdateBookMemberRequest $request
+     * @param FinancialBook $book
+     * @param BookMember $member
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    protected function updateMemberRole(UpdateBookMemberRequest $request, FinancialBook $book, BookMember $member)
+    {
+        // TAMBAHAN FIX 1: Otomatisasi Creator di Controller
+        // Ini akan menangani 403 jika UpdateBookMemberRequest gagal mengotorisasi Creator.
+        $this->authorizeCreator($book);
+
+        if ($member->book_id !== $book->id) {
+            return back()->withErrors(['error' => 'Anggota tidak valid untuk buku ini.']);
+        }
+
+        if ($member->user_id === Auth::id()) {
+            return back()->withErrors(['error' => 'Anda tidak dapat mengubah peran Anda sendiri.']);
+        }
+
+        $action = $request->validated('action');
+        // TAMBAHAN FIX 2: Mengubah peran promosi dari 'editor' menjadi 'admin'
+        $newRole = $action === 'promote' ? 'admin' : 'member'; 
+
+        if ($member->role === 'creator') {
+            return back()->withErrors(['error' => 'Peran creator tidak dapat diubah.']);
+        }
+        
+        if ($member->role === $newRole) {
+             $message = $action === 'promote' ? 'Anggota sudah menjadi admin.' : 'Anggota sudah menjadi member.';
+             return back()->withErrors(['error' => $message]);
+        }
+        
+        try {
+            $member->update(['role' => $newRole]);
+            // TAMBAHAN FIX 2: Pesan notifikasi disesuaikan
+            $message = $action === 'promote' ? 'Anggota berhasil dipromosikan menjadi admin.' : 'Anggota berhasil didemosi menjadi member.';
+            return back()->with('success', $message);
+
+        } catch (\Exception $e) {
+            Log::error("Failed to update member role ID {$member->user_id}: " . $e->getMessage());
+            return back()->withErrors(['error' => 'Gagal mengubah peran anggota.']);
+        }
+    }   
+
+   
 }

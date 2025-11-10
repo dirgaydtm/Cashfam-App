@@ -97,8 +97,13 @@ export default function Dashboard() {
                            <BookCard
                             key={book.id}
                             // Pastikan kita meyakinkan TypeScript bahwa book memiliki total_income/expenses (dari BE)
-                            // Kita menggunakan as any untuk menghindari Type Error sementara kita debug
-                            book={book as any} 
+                            // Jika backend belum menyediakan properti ini, berikan nilai default sehingga tipe terpenuhi
+                            book={{
+                                ...book,
+                                total_expenses: (book as any).total_expenses ?? 0,
+                                total_income: (book as any).total_income ?? 0,
+                                budget: (book as any).budget ?? null,
+                            }}
                             currentUserId={user.id}
                             onManageMembers={modalHandlers.openMembersModal}
                             onLeave={modalHandlers.openLeaveModal}

@@ -26,7 +26,7 @@ Route::get('/theme', function () {
     return Inertia::render('Theme/Theme');
 })->middleware(['auth'])->name('theme');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth','verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -36,6 +36,26 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/books/{book}', [BookController::class, 'destroy'])->name('books.destroy');
     Route::post('/books/join', [BookController::class, 'join'])->name('books.join');
     Route::post('/books/{book}/leave', [BookController::class, 'leave'])->name('books.leave');
+
+    Route::resource('books', BookController::class);
+
+    Route::post('books/{book}/regenerate-invitation', [BookController::class, 'regenerateInvitation'])
+         ->name('books.regenerate-invitation');
+
+    Route::resource('books.members', BookController::class)->only([
+        'update', // PATCH /books/{book}/members/{member}
+        'destroy', // DELETE /books/{book}/members/{member}
+    ]);
+    
+    Route::patch('books/{book}/members/{member}', [BookController::class, 'updateMember'])
+        ->name('books.members.update');
+
+    Route::delete('books/{book}/members/{member}', [BookController::class, 'destroyMember'])
+        ->name('books.members.destroy');
+
+    Route::post('/books/{book}/promote-member', [BookController::class, 'promoteMember'])->name('books.promote-member');
+    Route::post('/books/{book}/demote-member', [BookController::class, 'demoteMember'])->name('books.demote-member');
+    Route::post('/books/{book}/remove-member', [BookController::class, 'removeMember'])->name('books.remove-member');
 
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');

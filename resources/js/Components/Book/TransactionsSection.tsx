@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import type { FinancialBook, Transaction } from '@/types';
-import { dummyTransactions, currentUser } from '@/data';
+import { currentUser } from '@/data';
 import { formatRupiah } from '@/utils/currency';
 import { Calendar, CheckCircle, Search, TrendingDown, TrendingUp, User, X, XCircle } from 'lucide-react';
 
