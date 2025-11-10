@@ -1,41 +1,38 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { PageProps } from '@/types';
 import UpdateProfileForm from '@/Components/Profile/UpdateProfileForm';
 import DeleteAccountForm from '@/Components/Profile/DeleteAccountForm';
+import InitialAvatar from '@/Components/Main/InitialAvatar';
 
 export default function Profile({ status }: PageProps<{ status?: string }>) {
+    const user = usePage().props.auth.user;
     return (
-        <AuthenticatedLayout
-        >
+        <AuthenticatedLayout >
             <Head title="Profile" />
 
-            <div className="space-y-6">
-                {/* Success Status Alert */}
-                {status && (
-                    <div className="alert alert-success">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-6 w-6 shrink-0 stroke-current"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                        </svg>
-                        <span>{status}</span>
+            <div className="flex m-auto h-[75vh] max-w-7xl gap-7 items-center space-y-8">
+                {/* Profile*/}
+                <div className="h-full flex flex-col justify-center items-center gap-2 mb-2 flex-1">
+                    <InitialAvatar
+                        username={user.name}
+                        className="w-80 h-80 text-[12rem] m-6"
+                    />
+                    <h2 className="font-bold text-3xl leading-tight">{user.name}</h2>
+                    <div className="text-center text-sm">
+                        <p className="text-base-content/70">{user.email}</p>
+                        <p className="text-base-content/70">Joined on {user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}</p>
                     </div>
-                )}
+                </div>
 
-                {/* Update Profile Information */}
-                <UpdateProfileForm />
 
-                {/* Delete Account Section */}
-                <DeleteAccountForm />
+                <div className='flex flex-col gap-7 flex-2'>
+                    {/* Update Profile Section */}
+                    <UpdateProfileForm />
+
+                    {/* Delete Account Section */}
+                    <DeleteAccountForm />
+                </div>
             </div>
         </AuthenticatedLayout>
     );

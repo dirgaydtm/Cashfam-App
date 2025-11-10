@@ -1,4 +1,9 @@
-const Avatar = ({ username }: { username: string }) => {
+interface Avatar {
+    username: string;
+    className?: string;
+}
+
+const Avatar = ({ username, className }: Avatar) => {
     const initial = username
         ?.split(" ")
         .map((word: string) => word[0])
@@ -6,7 +11,7 @@ const Avatar = ({ username }: { username: string }) => {
         .toUpperCase() || "?"
 
     return (
-        <div className="size-full rounded-full text-base md:text-3xl bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center font-bold text-white shadow-md">
+        <div className={`size-full select-none rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center font-bold text-white shadow-md ${className ?? ''}`}>
             {initial}
         </div>
     )
