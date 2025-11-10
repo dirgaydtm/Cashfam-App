@@ -23,26 +23,8 @@ export default function Dashboard() {
     const [membersBook, setMembersBook] = useState<FinancialBook | null>(null);
     const [leaveBook, setLeaveBook] = useState<FinancialBook | null>(null);
 
-    // 🔴 TODO-BE: Gunakan data dari backend props
-    // const userBooks = props.userBooks || [];
-    // const transactions = props.transactions || [];
-
-    // Temporary: gunakan dummy data [Jangan Lupa Hapus][Penggantinya di bawah]
-    // const userBooks = dummyFinancialBooks.filter(book =>
-    //     book.members.some(member => member.user.id === currentUser.id)
-    // );
-    // const transactions = dummyTransactions;
 
     const userBooks = props.userBooks || [];
-
-
-    // const handleLeaveBookSuccess = () => {
-    //     router.reload({
-    //         only: ['userBooks', 'transactions']
-    //     });
-    //     console.log('Book left successfully, refreshing data...');
-    // };
-    
 
     const modalHandlers = {
         openCreateModal: () => setIsCreateModalOpen(true),
@@ -92,7 +74,7 @@ export default function Dashboard() {
                             Manage your collaborative finances
                         </p>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
                         {userBooks.map(book => (
                            <BookCard
                             key={book.id}

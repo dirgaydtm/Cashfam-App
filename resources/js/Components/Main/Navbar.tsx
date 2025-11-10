@@ -1,8 +1,9 @@
 import { ReactNode, useEffect, useRef, useState } from 'react';
 import { UserIcon, Palette, LogOut, Home, Plus, RectangleEllipsis } from 'lucide-react';
 import { Link, usePage } from '@inertiajs/react';
-import { User , PageProps } from '@/types';
+import { User, PageProps } from '@/types';
 import InitialAvatar from './InitialAvatar';
+import Logo from './Logo';
 
 interface MenuItem {
     type: 'item';
@@ -62,9 +63,7 @@ const Navbar = ({ onCreateBook, onJoinBook }: NavbarProps) => {
             {/* Logo Section */}
             <div className="navbar-start">
                 <Link href={route('dashboard')} className='flex justify-start items-center gap-2 m-2 hover:opacity-80 transition-opacity'>
-                    {/* Logo image. Place your image file into `public/images/` with the exact filename below. */}
-                    {/* We compute a simple average color from the loaded image and apply it to the title. */}
-                    <LogoInline src="/images/WhatsApp_Image_2025-10-14_at_08.23.25_01803d64__1_-removebg-preview.png" alt="CashFam logo" />
+                    <Logo className='w-7 md:w-9 text-primary ' />
                 </Link>
             </div>
 
@@ -97,7 +96,7 @@ const Navbar = ({ onCreateBook, onJoinBook }: NavbarProps) => {
                         role="button"
                         aria-label="User menu"
                     >
-                        <InitialAvatar username={user.name} />
+                        <InitialAvatar username={user.name} className="text-base md:text-3xl" />
                     </div>
                     <ul className="menu menu-sm dropdown-content mt-4 p-0 z-[1] border bg-base-100 rounded-box pb-3 md:w-72">
                         <li className="menu-title m-2">
