@@ -1,18 +1,17 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, usePage, router } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { Plus, HandCoins, RectangleEllipsis } from 'lucide-react';
-import { dummyFinancialBooks, currentUser, dummyTransactions } from '@/data';
-import type { FinancialBook, PageProps, Transaction } from '@/types';
+import type { FinancialBook, PageProps } from '@/types';
 import CreateBookModal from '@/Components/Main/CreateBookModal';
 import JoinBookModal from '@/Components/Main/JoinBookModal';
 import MembersModal from '@/Components/Main/MembersModal';
 import BookCard from '@/Components/Main/BookCard';
 import LeaveBookModal from '@/Components/Main/LeaveBookModal';
 
+
 interface DashboardProps extends PageProps {
     userBooks?: FinancialBook[];
-    transactions?: Transaction[];
 }
 
 export default function Dashboard() {
@@ -28,18 +27,22 @@ export default function Dashboard() {
     // const userBooks = props.userBooks || [];
     // const transactions = props.transactions || [];
 
-    // Temporary: gunakan dummy data
-    const userBooks = dummyFinancialBooks.filter(book =>
-        book.members.some(member => member.user.id === currentUser.id)
-    );
-    const transactions = dummyTransactions;
+    // Temporary: gunakan dummy data [Jangan Lupa Hapus][Penggantinya di bawah]
+    // const userBooks = dummyFinancialBooks.filter(book =>
+    //     book.members.some(member => member.user.id === currentUser.id)
+    // );
+    // const transactions = dummyTransactions;
 
-    const handleLeaveBookSuccess = () => {
-        router.reload({
-            only: ['userBooks', 'transactions']
-        });
-        console.log('Book left successfully, refreshing data...');
-    };
+    const userBooks = props.userBooks || [];
+
+
+    // const handleLeaveBookSuccess = () => {
+    //     router.reload({
+    //         only: ['userBooks', 'transactions']
+    //     });
+    //     console.log('Book left successfully, refreshing data...');
+    // };
+    
 
     const modalHandlers = {
         openCreateModal: () => setIsCreateModalOpen(true),
@@ -52,6 +55,7 @@ export default function Dashboard() {
         closeLeaveModal: () => setLeaveBook(null),
     };
 
+    
     const hasNoBooks = userBooks.length === 0;
 
     return (
@@ -90,14 +94,20 @@ export default function Dashboard() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {userBooks.map(book => (
-                            <BookCard
-                                key={book.id}
-                                book={book}
-                                currentUserId={currentUser.id}
-                                transactions={transactions}
-                                onManageMembers={modalHandlers.openMembersModal}
-                                onLeave={modalHandlers.openLeaveModal}
-                            />
+                           <BookCard
+                            key={book.id}
+                            // Pastikan kita meyakinkan TypeScript bahwa book memiliki total_income/expenses (dari BE)
+                            // Jika backend belum menyediakan properti ini, berikan nilai default sehingga tipe terpenuhi
+                            book={{
+                                ...book,
+                                total_expenses: (book as any).total_expenses ?? 0,
+                                total_income: (book as any).total_income ?? 0,
+                                budget: (book as any).budget ?? null,
+                            }}
+                            currentUserId={user.id}
+                            onManageMembers={modalHandlers.openMembersModal}
+                            onLeave={modalHandlers.openLeaveModal}
+                        />
                         ))}
                     </div>
                 </div>
@@ -146,7 +156,7 @@ export default function Dashboard() {
                 isOpen={!!leaveBook}
                 onClose={modalHandlers.closeLeaveModal}
                 book={leaveBook}
-                onSuccess={handleLeaveBookSuccess}
+                // Hapus onSuccess={handleLeaveBookSuccess}
             />
         </AuthenticatedLayout>
     );

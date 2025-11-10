@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useForm } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { DollarSign, FileText } from 'lucide-react';
 import Modal from '@/Layouts/Modal';
 
@@ -26,17 +27,14 @@ export default function CreateBookModal({ isOpen, onClose }: CreateBookModalProp
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // 🔴 TODO-BE: Implementasi backend untuk create book
+        // 🔴 TODO-BE: Implementasi backend untuk create book SUDAH LAE
         post(route('books.store'), {
             onSuccess: () => {
                 reset();
                 onClose();
+                router.reload({ only: ['userBooks'] });
             }
         });
-
-        // console.log('Creating book with data:', data);
-        // reset();
-        // onClose();
     };
 
     const handleClose = () => {

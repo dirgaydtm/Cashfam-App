@@ -1,6 +1,6 @@
 import { AlertTriangle, LogOut } from 'lucide-react';
 import Modal from '@/Layouts/Modal';
-import { router } from '@inertiajs/react';
+import { useForm,router } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FinancialBook } from '@/types';
 
@@ -12,24 +12,35 @@ interface LeaveBookModalProps {
 }
 
 export default function LeaveBookModal({ isOpen, onClose, book, onSuccess }: LeaveBookModalProps) {
-    const [isLoading, setIsLoading] = useState(false);
+    // const [isLoading, setIsLoading] = useState(false);
+
+    const { post, processing, errors } = useForm({});
+    const [specificError, setSpecificError] = useState<string | null>(null);
 
     const handleLeaveBook = () => {
         if (!book) return;
 
-        setIsLoading(true);
+        // setIsLoading(true);
 
         // 🔴 TODO-BE: Implementasi backend untuk leave book
-        router.post(route('books.leave', book.id), {}, {
+       post(route('books.leave', book.id), {
             onSuccess: () => {
-                setIsLoading(false);
                 onClose();
-                onSuccess?.(); // Call parent callback if provided
+                onSuccess?.();
+                // Redirect di sini dihapus karena backend sudah me-redirect ke books.index
             },
-            onError: (errors) => {
-                setIsLoading(false);
-                console.error('Failed to leave book:', errors);
-                // TODO: Show error toast/notification
+            // TANGKAP ERROR DARI BACKEND
+            onError: (formErrors) => {
+                // Error 'error' dikirim dari backend, kita tampilkan
+                const backendError = formErrors.error;
+                
+                if (backendError) {
+                    setSpecificError(backendError);
+                } else {
+                    // Jika ada error lain yang tidak kita antisipasi
+                    setSpecificError('Terjadi kesalahan saat mencoba meninggalkan buku.');
+                    console.error('Failed to leave book:', formErrors);
+                }
             }
         });
 
@@ -59,6 +70,12 @@ export default function LeaveBookModal({ isOpen, onClose, book, onSuccess }: Lea
             showCloseButton={false}
         >
             <div className="space-y-4 mb-8">
+                {specificError && (
+                    <div role="alert" className="alert alert-error">
+                        <AlertTriangle size={20} />
+                        <span className="text-sm font-medium">{specificError}</span>
+                    </div>
+                )}
                 <div className="bg-base-200 p-4 rounded-lg">
                     <p className="font-medium text-base-content/90">
                         You're about to leave:
@@ -87,9 +104,9 @@ export default function LeaveBookModal({ isOpen, onClose, book, onSuccess }: Lea
                 <button
                     className="btn btn-error btn-sm md:btn-md px-6"
                     onClick={handleLeaveBook}
-                    disabled={isLoading}
+                    disabled={processing}
                 >
-                    {isLoading ? (
+                    {processing ? (
                         <>
                             <span className="loading loading-spinner loading-xs"></span>
                             Leaving...

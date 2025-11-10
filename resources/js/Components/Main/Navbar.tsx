@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
-import { PiggyBank, UserIcon, Palette, LogOut, Home, Plus, RectangleEllipsis } from 'lucide-react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
+import { UserIcon, Palette, LogOut, Home, Plus, RectangleEllipsis } from 'lucide-react';
 import { Link, usePage } from '@inertiajs/react';
 import { User , PageProps } from '@/types';
 import InitialAvatar from './InitialAvatar';
@@ -62,8 +62,9 @@ const Navbar = ({ onCreateBook, onJoinBook }: NavbarProps) => {
             {/* Logo Section */}
             <div className="navbar-start">
                 <Link href={route('dashboard')} className='flex justify-start items-center gap-2 m-2 hover:opacity-80 transition-opacity'>
-                    <PiggyBank className='size-6 md:size-8 text-primary' />
-                    <h1 className="text-base md:text-2xl font-bold text-primary">CASHFAM</h1>
+                    {/* Logo image. Place your image file into `public/images/` with the exact filename below. */}
+                    {/* We compute a simple average color from the loaded image and apply it to the title. */}
+                    <LogoInline src="/images/WhatsApp_Image_2025-10-14_at_08.23.25_01803d64__1_-removebg-preview.png" alt="CashFam logo" />
                 </Link>
             </div>
 
@@ -126,3 +127,75 @@ const Navbar = ({ onCreateBook, onJoinBook }: NavbarProps) => {
 }
 
 export default Navbar
+
+function LogoInline({ src, alt }: { src: string; alt?: string }) {
+    const imgRef = useRef<HTMLImageElement | null>(null);
+    const [color, setColor] = useState<string | null>(null);
+
+    useEffect(() => {
+        const img = imgRef.current;
+        if (!img) return;
+
+        const computeColor = () => {
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return;
+
+                const w = 32;
+                const h = 32;
+                canvas.width = w;
+                canvas.height = h;
+                ctx.drawImage(img, 0, 0, w, h);
+                const data = ctx.getImageData(0, 0, w, h).data;
+
+                let r = 0, g = 0, b = 0, count = 0;
+                for (let i = 0; i < data.length; i += 16) {
+                    const alpha = data[i + 3];
+                    if (alpha === 0) continue;
+                    r += data[i];
+                    g += data[i + 1];
+                    b += data[i + 2];
+                    count++;
+                }
+                if (count > 0) {
+                    r = Math.round(r / count);
+                    g = Math.round(g / count);
+                    b = Math.round(b / count);
+                    setColor(`rgb(${r}, ${g}, ${b})`);
+                }
+            } catch (err) {
+                // ignore (likely CORS)
+            }
+        };
+
+        if (img.complete && img.naturalWidth) {
+            computeColor();
+        } else {
+            img.addEventListener('load', computeColor);
+        }
+
+        return () => img.removeEventListener('load', computeColor);
+    }, [src]);
+
+    return (
+        <>
+            <img
+                ref={imgRef}
+                src={src}
+                alt={alt}
+                className="w-8 md:w-18 object-contain"
+                onError={(e) => {
+                    // @ts-ignore
+                    e.currentTarget.src = '/images/logo-fallback.png';
+                }}
+            />
+            <h1
+                className={`text-base md:text-2xl font-bold ${color ? '' : 'text-primary'}`}
+                style={color ? { color } : undefined}
+            >
+                CASHFAM
+            </h1>
+        </>
+    );
+}

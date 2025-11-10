@@ -1,26 +1,27 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
-import { useMemo } from 'react';
-import { usePage } from '@inertiajs/react';
-import { dummyFinancialBooks, currentUser } from '@/data';
+import { Head, usePage } from '@inertiajs/react';
 import type { FinancialBook } from '@/types';
 import { X } from 'lucide-react';
 import BookHeader from '@/Components/Book/BookHeader';
 import TransactionsSection from '@/Components/Book/TransactionsSection';
 import AddTransactionForm from '@/Components/Book/AddTransactionForm';
 
-type PageProps = {
-    bookId: string;
-};
+
+
+interface BookPageProps {
+    book: FinancialBook & {
+        total_expenses: number; // Data ini harus dikirim dari Backend
+        total_income: number;   // Data ini harus dikirim dari Backend
+    };
+    transactions: any[]; // Kita kirim array kosong sementara
+    // Properti Inertia lainnya seperti auth
+    auth: { user: { id: number; name: string; email: string; } };
+}
 
 export default function BookPage() {
-    const { props } = usePage();
-    const { bookId } = props as unknown as PageProps;
-
-    const book: FinancialBook | undefined = useMemo(
-        () => dummyFinancialBooks.find((b) => b.id === String(bookId)),
-        [bookId]
-    );
+    const { book, transactions, auth } = usePage().props as unknown as BookPageProps;
+    
+    const { user } = auth;
 
     if (!book) {
         return (
@@ -35,8 +36,10 @@ export default function BookPage() {
     }
 
     const role: 'creator' | 'admin' | 'member' =
-        book.members.find((m) => m.user.id === currentUser.id)?.role || 'member';
+        book.members.find((m) => m.user.id === user.id)?.role || 'member'; // Menggunakan user.id yang benar
     const canEdit = role === 'creator' || role === 'admin';
+
+    const currentUserId = user.id;
 
     return (
         <AuthenticatedLayout
@@ -56,11 +59,11 @@ export default function BookPage() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2">
-                        <TransactionsSection book={book} />
+                        <TransactionsSection book={book} transactions={transactions} /> 
                     </div>
 
                     <div>
-                        <AddTransactionForm book={book} />
+                        <AddTransactionForm book={book} userId={currentUserId} />
                     </div>
                 </div>
             </div>
