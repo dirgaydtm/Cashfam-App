@@ -127,13 +127,6 @@ export default function MembersModal({ isOpen, onClose, book }: MembersModalProp
         );
     };
 
-    const shareViaEmail = () => {
-        const subject = `Join "${book.name}" on CasFam`;
-        const body = `Hi! I'd like to invite you to collaborate on "${book.name}" in CasFam.\n\nUse this invitation code: ${book.invitation_code}\n\nOpen CasFam and use the Join feature, then enter the code above to join our book.`;
-
-        window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    };
-
     const getRoleIcon = (role: string) => {
         switch (role) {
             case 'creator': return <Crown size={16} className="text-primary" />;
@@ -243,38 +236,15 @@ export default function MembersModal({ isOpen, onClose, book }: MembersModalProp
                                 {book.invitation_code}
                             </div>
                             <button
-                                className="btn btn-square btn-outline"
-                                onClick={regenerateCode}
-                                disabled={isModalBusy || !isCurrentUserCreator} // Hanya Creator yang bisa regenerate
-                                title="Regenerate code"
-                            >
-                                {isRegenerating ? <Loader2 size={18} className="animate-spin" /> : <RefreshCw size={18} />}
-                            </button>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                            <button
                                 className={`btn btn-outline gap-2 ${copied ? 'btn-success' : ''}`}
                                 onClick={() => copyToClipboard(book.invitation_code)}
                                 disabled={isModalBusy}
                             >
                                 {copied ? <CheckCircle size={18} /> : <Copy size={18} />}
-                                Copy Code
-                            </button>
-
-                            <button
-                                className="btn btn-outline gap-2"
-                                onClick={shareViaEmail}
-                                disabled={isModalBusy}
-                            >
-                                <Mail size={18} />
-                                Email Invite
                             </button>
                         </div>
 
-                        <p className="text-sm text-base-content/60">
-                            Share this code with people you want to invite. Anyone with this code can join until you regenerate it.
-                        </p>
+                        
                     </div>
 
                     {/* Members List */}
@@ -413,30 +383,6 @@ export default function MembersModal({ isOpen, onClose, book }: MembersModalProp
                                 </div>
                             );
                         })}
-                    </div>
-
-                    {/* Permissions Legend */}
-                    <div className="card bg-base-200">
-                        <div className="card-body p-4">
-                            <h4 className="font-semibold mb-3">Role Permissions</h4>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex items-center gap-2">
-                                    <Crown size={16} className="text-primary flex-shrink-0" />
-                                    <span className="font-medium flex-shrink-0">Creator:</span>
-                                    <span className="text-base-content/70">Full control, can promote/demote/remove any non-creator, can't be removed</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Shield size={16} className="text-secondary flex-shrink-0" />
-                                    <span className="font-medium flex-shrink-0">Admin:</span>
-                                    <span className="text-base-content/70">Manage members (remove), approve transactions</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <User size={16} className="text-base-content/60 flex-shrink-0" />
-                                    <span className="font-medium flex-shrink-0">Member:</span>
-                                    <span className="text-base-content/70">Add transactions, view data</span>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     {/* Close Button */}
