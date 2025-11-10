@@ -1,15 +1,18 @@
 import { LogOut, MoreVertical, TrendingDown, TrendingUp, Users, Trash2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { FinancialBook, Transaction } from "@/types";
+import type { FinancialBook } from "@/types";
 import { formatRupiah } from "@/utils/currency";
 import { getSpentPercent } from "@/utils/budget";
 import React, { useMemo, useCallback } from "react";
 import { router } from '@inertiajs/react';
 
 interface BookCardProps {
-    book: FinancialBook;
+    book: FinancialBook & {
+        total_expenses: number;
+        total_income: number;
+        budget: number | null; // Tambahkan budget agar progress bar berfungsi
+    };
     currentUserId: number;
-    transactions: Transaction[]; // 🔴 TODO-BE: Hapus ini, backend seharusnya kirim total_income & total_expense langsung di object book
     onManageMembers: (book: FinancialBook) => void;
     onLeave?: (book: FinancialBook) => void;
     onDelete?: (book: FinancialBook) => void;
@@ -35,11 +38,13 @@ interface MenuAction {
 const BookCard: React.FC<BookCardProps> = ({
     book,
     currentUserId,
-    transactions,
     onManageMembers,
     onLeave,
     onDelete,
 }) => {
+
+    const { total_income, total_expenses, budget } = book;
+
     const userRole = useMemo(
         () => book.members.find((m) => m.user.id === currentUserId)?.role,
         [book.members, currentUserId]
@@ -50,34 +55,38 @@ const BookCard: React.FC<BookCardProps> = ({
     // Sehingga frontend tidak perlu filter & calculate manual
 
     // 🔴 BACKEND: Ini tidak efisien, FE menerima SEMUA transactions lalu di-filter per book
-    const bookTransactions = useMemo(
-        () => transactions.filter((t) => t.book_id === book.id && t.status === "approved"),
-        [transactions, book.id]
-    );
+    // const bookTransactions = useMemo(
+    //     () => transactions.filter((t) => t.book_id === book.id && t.status === "approved"),
+    //     [transactions, book.id]
+    // );
 
-    // 🔴 BACKEND: Calculation ini seharusnya dilakukan di BE menggunakan SQL SUM()
-    const { income: totalIncome, expense: totalExpenses } = useMemo(() => {
-        return bookTransactions.reduce(
-            (acc, t) => {
-                if (t.type === "income") {
-                    acc.income += t.amount;
-                } else if (t.type === "expense") {
-                    acc.expense += t.amount;
-                }
-                return acc;
-            },
-            { income: 0, expense: 0 }
-        );
-    }, [bookTransactions]);
+    // // 🔴 BACKEND: Calculation ini seharusnya dilakukan di BE menggunakan SQL SUM()
+    // const { income: totalIncome, expense: totalExpenses } = useMemo(() => {
+    //     return bookTransactions.reduce(
+    //         (acc, t) => {
+    //             if (t.type === "income") {
+    //                 acc.income += t.amount;
+    //             } else if (t.type === "expense") {
+    //                 acc.expense += t.amount;
+    //             }
+    //             return acc;
+    //         },
+    //         { income: 0, expense: 0 }
+    //     );
+    // }, [bookTransactions]);
 
     // ✅ SETELAH IMPLEMENTASI BE, ganti menjadi:
     // const totalIncome = book.total_income;
     // const totalExpenses = book.total_expense;
     // 🔴 END TODO-BE
 
+
+    const totalIncome = total_income ?? 0;
+    const totalExpenses = total_expenses ?? 0;
+    
     const spentPercent = useMemo(
-        () => getSpentPercent(totalExpenses, book.budget),
-        [totalExpenses, book.budget]
+        () => getSpentPercent(totalExpenses, budget),
+        [totalExpenses, budget]
     );
 
     const summaryItems: SummaryItem[] = useMemo(
@@ -227,7 +236,7 @@ const BookCard: React.FC<BookCardProps> = ({
                     <div className="mb-4">
                         <div className="flex justify-between text-xs lg:text-sm mb-1">
                             <span>Budget</span>
-                            <span>{formatRupiah(book.budget)}</span>
+                            <span>{formatRupiah(budget)}</span>
                         </div>
                         <progress
                             className="progress progress-primary w-full"

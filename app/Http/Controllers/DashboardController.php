@@ -20,16 +20,18 @@ class DashboardController extends Controller
             $query->where('user_id', $user->id);
         })
         // PENTING: Eager load relasi yang dibutuhkan frontend
-        ->with([
-            'creator',       // Untuk menampilkan siapa pembuat buku
-            'members.user'   // Untuk mendapatkan daftar anggota dan data pengguna mereka
-        ])
-        ->get();
+        ->with(['members.user']) // Muat relasi members
+        // 🚀 TAMBAHKAN: Muat total income dan expense
+        ->withSum(['transactions as total_income' => function ($q) {
+            $q->where('type', 'income')->where('status', 'approved');
+        }], 'amount')
+        ->withSum(['transactions as total_expenses' => function ($q) {
+            $q->where('type', 'expense')->where('status', 'approved');
+        }], 'amount')
+        ->get(); // Ambil koleksi buku
 
-        return Inertia::render('Main/Dashboard', [
-            // Mengirim data nyata ke frontend
-            'userBooks' => $userBooks,
-            'transactions' => [], // Kirim array kosong atau data transaksi nyata
+        return Inertia::render('Main/Dashboard', [ 
+            'userBooks' => $userBooks
         ]);
     }
 }

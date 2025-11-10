@@ -1,9 +1,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, usePage, router } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { Plus, HandCoins, RectangleEllipsis } from 'lucide-react';
-import { dummyFinancialBooks, currentUser, dummyTransactions } from '@/data';
-import type { FinancialBook, PageProps, Transaction } from '@/types';
+import type { FinancialBook, PageProps } from '@/types';
 import CreateBookModal from '@/Components/Main/CreateBookModal';
 import JoinBookModal from '@/Components/Main/JoinBookModal';
 import MembersModal from '@/Components/Main/MembersModal';
@@ -13,7 +12,6 @@ import LeaveBookModal from '@/Components/Main/LeaveBookModal';
 
 interface DashboardProps extends PageProps {
     userBooks?: FinancialBook[];
-    transactions?: Transaction[];
 }
 
 export default function Dashboard() {
@@ -36,7 +34,6 @@ export default function Dashboard() {
     // const transactions = dummyTransactions;
 
     const userBooks = props.userBooks || [];
-    const transactions = props.transactions || []; 
 
 
     // const handleLeaveBookSuccess = () => {
@@ -97,14 +94,15 @@ export default function Dashboard() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {userBooks.map(book => (
-                            <BookCard
-                                key={book.id}
-                                book={book}
-                                currentUserId={currentUser.id}
-                                transactions={transactions}
-                                onManageMembers={modalHandlers.openMembersModal}
-                                onLeave={modalHandlers.openLeaveModal}
-                            />
+                           <BookCard
+                            key={book.id}
+                            // Pastikan kita meyakinkan TypeScript bahwa book memiliki total_income/expenses (dari BE)
+                            // Kita menggunakan as any untuk menghindari Type Error sementara kita debug
+                            book={book as any} 
+                            currentUserId={user.id}
+                            onManageMembers={modalHandlers.openMembersModal}
+                            onLeave={modalHandlers.openLeaveModal}
+                        />
                         ))}
                     </div>
                 </div>
