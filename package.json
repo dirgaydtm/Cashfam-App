@@ -29,6 +29,7 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
-        "lucide-react": "^0.544.0"
+        "lucide-react": "^0.544.0",
+        "react-loader-spinner": "^8.0.0"
     }
 }

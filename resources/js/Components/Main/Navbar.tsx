@@ -59,7 +59,7 @@ const Navbar = ({ onCreateBook, onJoinBook }: NavbarProps) => {
     const isDashboard = url === '/dashboard';
 
     return (
-        <nav className="navbar bg-base-100 shadow-sm p-3 sticky top-0 z-50 lg:px-10" role="navigation">
+        <nav className="navbar bg-base-100 shadow-sm p-3 sticky top-0 z-20 lg:px-10" role="navigation">
             {/* Logo Section */}
             <div className="navbar-start">
                 <Link href={route('dashboard')} className='flex justify-start items-center gap-2 m-2 hover:opacity-80 transition-opacity'>
