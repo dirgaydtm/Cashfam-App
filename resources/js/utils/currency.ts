@@ -1,3 +1,4 @@
 export const formatRupiah = (amount: number): string => {
-    return `Rp ${amount.toLocaleString('id-ID')}`;
+    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return `Rp ${numAmount.toLocaleString('id-ID')}`;
 };
