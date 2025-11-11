@@ -15,25 +15,5 @@ export const dummyUsers: User[] = [
 export const currentUser: User = dummyUsers[0];
 
 
-// Transaction Categories
-export const transactionCategories = [
-    "Belanja",
-    "Utilitas",
-    "Sewa",
-    "Transportasi",
-    "Hiburan",
-    "Kesehatan",
-    "Pendidikan",
-    "Berbelanja",
-    "Makan",
-    "Perjalanan",
-    "Gaji",
-    "Freelance",
-    "Investasi",
-    "Hadiah",
-    "Lainnya",
-];
-
-
 
 
