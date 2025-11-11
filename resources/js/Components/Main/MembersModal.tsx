@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, Crown, Shield, User, UserMinus, UserCheck, Mail, Copy, RefreshCw, CheckCircle, Loader2 } from 'lucide-react';
+import { Users, Crown, Shield, User, UserMinus, UserCheck, Mail, Copy, CheckCircle, Loader2, EllipsisVertical } from 'lucide-react';
 import Modal from '@/Layouts/Modal';
 import { currentUser } from '@/data.js';
 import InitialAvatar from '@/Components/Main/InitialAvatar';
@@ -13,20 +13,17 @@ interface MembersModalProps {
 }
 
 export default function MembersModal({ isOpen, onClose, book }: MembersModalProps) {
-    
+
     const [selectedMember, setSelectedMember] = useState<BookMember | null>(null);
     const [actionType, setActionType] = useState<'promote' | 'demote' | 'remove' | null>(null);
     const [copied, setCopied] = useState(false);
-
-    // State untuk loading regenerasi kode
-    const [isRegenerating, setIsRegenerating] = useState(false);
     // State untuk loading tombol konfirmasi
     const [isConfirming, setIsConfirming] = useState(false);
 
     const handleMemberAction = (member: BookMember, action: 'promote' | 'demote' | 'remove') => {
         setSelectedMember(member);
         setActionType(action);
-        
+
     };
 
     const confirmAction = () => {
@@ -38,14 +35,13 @@ export default function MembersModal({ isOpen, onClose, book }: MembersModalProp
 
         const commonOptions = {
             onSuccess: () => {
-                router.reload({ only: ['book'] }); // Asumsikan Anda ingin me-refresh prop 'book'
+                // Reload data dari server untuk mendapatkan members terbaru
+                router.reload({ only: ['userBooks'] });
                 setSelectedMember(null);
                 setActionType(null);
-                // Biarkan isConfirming false saat onFinish
             },
             onError: (errors: any) => {
                 console.error('Action Failed', errors);
-                // Biarkan isConfirming false saat onFinish
             },
             onFinish: () => {
                 setIsConfirming(false);
@@ -73,7 +69,7 @@ export default function MembersModal({ isOpen, onClose, book }: MembersModalProp
     const currentUserRole: 'creator' | 'admin' | 'member' = currentMember?.role || 'creator';
     const isCurrentUserCreator = currentUserRole === 'creator';
     const isCurrentUserAdminOrCreator = currentUserRole === 'creator' || currentUserRole === 'admin';
-    
+
     // Hitung jumlah anggota yang dapat menyetujui transaksi (Creator atau Admin)
     const approverCount = book.members.filter(m => m.role === 'creator' || m.role === 'admin').length;
 
@@ -86,45 +82,19 @@ export default function MembersModal({ isOpen, onClose, book }: MembersModalProp
                 // Fallback
                 const textarea = document.createElement('textarea');
                 textarea.value = text;
-                textarea.style.position = 'fixed'; 
+                textarea.style.position = 'fixed';
                 document.body.appendChild(textarea);
                 textarea.focus();
                 textarea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textarea);
             }
-            
+
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         } catch (err) {
             console.error('Failed to copy: ', err);
         }
-    };
-
-    const regenerateCode = async () => {
-        setIsRegenerating(true);
-        router.post(
-            route('books.regenerate-invitation', book.id), 
-            {}, 
-            {
-                preserveScroll: true,
-                preserveState: true,
-
-                onSuccess: () => {
-                    router.reload({ only: ['book'] }); 
-                    // Biarkan isRegenerating false saat onFinish    
-                    setCopied(false);
-                    console.log('Kode undangan berhasil diperbarui!');            
-                },
-                onError: (errors: any) => {
-                    console.error('Regenerate Failed', errors);
-                    // Biarkan isRegenerating false saat onFinish
-                },
-                onFinish: () => {
-                    setIsRegenerating(false);
-                }
-            }
-        );
     };
 
     const getRoleIcon = (role: string) => {
@@ -135,17 +105,8 @@ export default function MembersModal({ isOpen, onClose, book }: MembersModalProp
         }
     };
 
-    const getRoleBadgeClass = (role: string) => {
-        switch (role) {
-            case 'creator': return 'badge-primary';
-            case 'admin': return 'badge-secondary';
-            default: return 'badge-neutral';
-        }
-    };
-
     // Tentukan apakah modal sedang dalam proses loading atau konfirmasi
-    const isModalBusy = isRegenerating || isConfirming;
-
+    const isModalBusy = isConfirming;
 
     return (
         <Modal
@@ -244,18 +205,18 @@ export default function MembersModal({ isOpen, onClose, book }: MembersModalProp
                             </button>
                         </div>
 
-                        
+
                     </div>
 
                     {/* Members List */}
                     <div className="space-y-3">
                         {book.members.map((member) => {
                             const isCurrentUser = member.user.id === currentUser.id;
-                            
+
                             // PERBAIKAN LOGIKA: Creator hanya bisa promote/demote ORANG LAIN
                             const canPromoteMember = isCurrentUserCreator
                                 && member.role === 'member'
-                                && !isCurrentUser; 
+                                && !isCurrentUser;
 
                             const canDemoteMember = isCurrentUserCreator
                                 && member.role === 'admin'
@@ -278,7 +239,7 @@ export default function MembersModal({ isOpen, onClose, book }: MembersModalProp
                             const showMenu = canModifyMember;
 
                             return (
-                                <div key={member.id} className="card bg-base-100 border">
+                                <div key={member.id} className="card bg-base-100 border-[0.02px]">
                                     <div className="card-body p-4">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3 flex-1">
@@ -307,27 +268,20 @@ export default function MembersModal({ isOpen, onClose, book }: MembersModalProp
                                                         Joined {new Date(member.joined_at).toLocaleDateString()}
                                                     </p>
                                                 </div>
-
-                                                {/* Role Badge */}
-                                                <div className={`badge ${getRoleBadgeClass(member.role)} flex-shrink-0`}>
-                                                    {member.role}
-                                                </div>
                                             </div>
 
                                             {/* Actions */}
                                             {showMenu && (
                                                 <div className="dropdown dropdown-end flex-shrink-0">
-                                                    <div 
-                                                        tabIndex={0} 
-                                                        role="button" 
+                                                    <div
+                                                        tabIndex={0}
+                                                        role="button"
                                                         className={`btn btn-ghost btn-sm btn-circle ${isActionDisabled ? 'opacity-50 pointer-events-none' : ''}`}
                                                         title="Member actions"
                                                     >
-                                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                                                        </svg>
+                                                        <EllipsisVertical className='h-4 w-4' />
                                                     </div>
-                                                    <ul className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-48">
+                                                    <ul className="dropdown-content z-[10] menu border bg-base-100 rounded-box w-48">
                                                         {canPromoteMember && (
                                                             <li>
                                                                 <button
@@ -369,12 +323,12 @@ export default function MembersModal({ isOpen, onClose, book }: MembersModalProp
                                                         )}
                                                         {/* Jika tidak ada opsi modifikasi, dropdown tidak perlu menampilkan ini */}
                                                         {!canModifyMember && (
-                                                             <li>
-                                                                 <span className="disabled block w-full text-left px-2">
-                                                                     No actions available
-                                                                 </span>
-                                                             </li>
-                                                         )}
+                                                            <li>
+                                                                <span className="disabled block w-full text-left px-2">
+                                                                    No actions available
+                                                                </span>
+                                                            </li>
+                                                        )}
                                                     </ul>
                                                 </div>
                                             )}
@@ -383,17 +337,6 @@ export default function MembersModal({ isOpen, onClose, book }: MembersModalProp
                                 </div>
                             );
                         })}
-                    </div>
-
-                    {/* Close Button */}
-                    <div className="flex justify-end mt-8">
-                        <button
-                            className="btn btn-primary"
-                            onClick={onClose}
-                            disabled={isModalBusy}
-                        >
-                            Done
-                        </button>
                     </div>
                 </div>
             )}

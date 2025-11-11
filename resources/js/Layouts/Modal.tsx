@@ -20,30 +20,6 @@ const Modal: React.FC<ModalProps> = ({
 }) => {
     const modalRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === "Escape" && isOpen) {
-                onClose();
-            }
-        };
-
-        if (isOpen) {
-            document.addEventListener("keydown", handleEscape);
-            document.body.style.overflow = "hidden";
-        }
-
-        return () => {
-            document.removeEventListener("keydown", handleEscape);
-            document.body.style.overflow = "unset";
-        };
-    }, [isOpen, onClose]);
-
-    const handleBackdropClick = (e: React.MouseEvent) => {
-        if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-            onClose();
-        }
-    };
-
     if (!isOpen) return null;
 
     const sizeClasses = {
@@ -74,14 +50,14 @@ const Modal: React.FC<ModalProps> = ({
                 </div>
 
                 {/* Content */}
-                <div className="overflow-y-auto">
+                <div className="">
                     {children}
                 </div>
             </div>
 
             {/* Backdrop */}
             <div
-                className="modal-backdrop bg-black/50"
+                className="modal-backdrop"
                 onClick={onClose}
             />
         </div>

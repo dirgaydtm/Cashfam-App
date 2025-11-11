@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, HandCoins, RectangleEllipsis } from 'lucide-react';
 import type { FinancialBook, PageProps } from '@/types';
 import CreateBookModal from '@/Components/Main/CreateBookModal';
@@ -8,6 +8,7 @@ import JoinBookModal from '@/Components/Main/JoinBookModal';
 import MembersModal from '@/Components/Main/MembersModal';
 import BookCard from '@/Components/Main/BookCard';
 import LeaveBookModal from '@/Components/Main/LeaveBookModal';
+import DeleteBookModal from '@/Components/Main/DeleteBookModal';
 
 
 interface DashboardProps extends PageProps {
@@ -22,9 +23,20 @@ export default function Dashboard() {
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
     const [membersBook, setMembersBook] = useState<FinancialBook | null>(null);
     const [leaveBook, setLeaveBook] = useState<FinancialBook | null>(null);
+    const [deleteBook, setDeleteBook] = useState<FinancialBook | null>(null);
 
 
     const userBooks = props.userBooks || [];
+
+    // Update membersBook ketika userBooks berubah (setelah reload)
+    useEffect(() => {
+        if (membersBook) {
+            const updatedBook = userBooks.find(b => b.id === membersBook.id);
+            if (updatedBook) {
+                setMembersBook(updatedBook);
+            }
+        }
+    }, [userBooks]);
 
     const modalHandlers = {
         openCreateModal: () => setIsCreateModalOpen(true),
@@ -35,9 +47,11 @@ export default function Dashboard() {
         closeMembersModal: () => setMembersBook(null),
         openLeaveModal: (book: FinancialBook) => setLeaveBook(book),
         closeLeaveModal: () => setLeaveBook(null),
+        openDeleteModal: (book: FinancialBook) => setDeleteBook(book),
+        closeDeleteModal: () => setDeleteBook(null),
     };
 
-    
+
     const hasNoBooks = userBooks.length === 0;
 
     return (
@@ -74,22 +88,23 @@ export default function Dashboard() {
                             Manage your collaborative finances
                         </p>
                     </div>
-                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
                         {userBooks.map(book => (
-                           <BookCard
-                            key={book.id}
-                            // Pastikan kita meyakinkan TypeScript bahwa book memiliki total_income/expenses (dari BE)
-                            // Jika backend belum menyediakan properti ini, berikan nilai default sehingga tipe terpenuhi
-                            book={{
-                                ...book,
-                                total_expenses: (book as any).total_expenses ?? 0,
-                                total_income: (book as any).total_income ?? 0,
-                                budget: (book as any).budget ?? null,
-                            }}
-                            currentUserId={user.id}
-                            onManageMembers={modalHandlers.openMembersModal}
-                            onLeave={modalHandlers.openLeaveModal}
-                        />
+                            <BookCard
+                                key={book.id}
+                                // Pastikan kita meyakinkan TypeScript bahwa book memiliki total_income/expenses (dari BE)
+                                // Jika backend belum menyediakan properti ini, berikan nilai default sehingga tipe terpenuhi
+                                book={{
+                                    ...book,
+                                    total_expenses: (book as any).total_expenses ?? 0,
+                                    total_income: (book as any).total_income ?? 0,
+                                    budget: (book as any).budget ?? null,
+                                }}
+                                currentUserId={user.id}
+                                onManageMembers={modalHandlers.openMembersModal}
+                                onLeave={modalHandlers.openLeaveModal}
+                                onDelete={modalHandlers.openDeleteModal}
+                            />
                         ))}
                     </div>
                 </div>
@@ -138,7 +153,12 @@ export default function Dashboard() {
                 isOpen={!!leaveBook}
                 onClose={modalHandlers.closeLeaveModal}
                 book={leaveBook}
-                // Hapus onSuccess={handleLeaveBookSuccess}
+            />
+
+            <DeleteBookModal
+                isOpen={!!deleteBook}
+                onClose={modalHandlers.closeDeleteModal}
+                book={deleteBook}
             />
         </AuthenticatedLayout>
     );

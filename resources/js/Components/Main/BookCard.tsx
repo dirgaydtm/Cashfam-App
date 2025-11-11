@@ -1,4 +1,4 @@
-import { LogOut, MoreVertical, TrendingDown, TrendingUp, Users, Trash2, Crown, UserStar, User } from "lucide-react";
+import { LogOut, MoreVertical, TrendingDown, TrendingUp, Users, Trash2, Crown, UserStar, User, Shield } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { FinancialBook } from "@/types";
 import { formatRupiah } from "@/utils/currency";
@@ -52,7 +52,7 @@ const BookCard: React.FC<BookCardProps> = ({
 
     const totalIncome = total_income ?? 0;
     const totalExpenses = total_expenses ?? 0;
-    
+
     const spentPercent = useMemo(
         () => getSpentPercent(totalExpenses, budget),
         [totalExpenses, budget]
@@ -79,6 +79,8 @@ const BookCard: React.FC<BookCardProps> = ({
     );
 
     const canManageBook = userRole === "creator" || userRole === "admin";
+    const canDeleteBook = userRole === "creator";
+    const canLeaveBook = userRole === "member" || userRole === "admin";
 
     const menuActions: MenuAction[] = useMemo(
         () => [
@@ -90,33 +92,28 @@ const BookCard: React.FC<BookCardProps> = ({
                 visible: () => canManageBook,
             },
             {
-                key: "delete-or-leave",
-                label: userRole === "creator" ? "Delete Book" : "Leave Book",
-                icon: userRole === "creator" ? Trash2 : LogOut,
-                onClick: (b) => {
-                    if (userRole === "creator") {
-                        onDelete?.(b);
-                    } else {
-                        onLeave?.(b);
-                    }
-                },
-                visible: () => (userRole === "creator" ? !!onDelete : !!onLeave),
+                key: "leave-book",
+                label: "Leave Book",
+                icon: LogOut,
+                onClick: (b) => onLeave?.(b),
+                visible: () => canLeaveBook && !!onLeave,
+                className: "text-warning",
+            },
+            {
+                key: "delete-book",
+                label: "Delete Book",
+                icon: Trash2,
+                onClick: (b) => onDelete?.(b),
+                visible: () => canDeleteBook && !!onDelete,
                 className: "text-error",
             },
         ],
-        [onManageMembers, onLeave, onDelete, userRole, canManageBook]
+        [onManageMembers, onLeave, onDelete, canManageBook, canDeleteBook, canLeaveBook]
     );
 
     const handleCardClick = useCallback(() => {
         router.get(route('books.show', book.id));
     }, [book.id]);
-
-    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleCardClick();
-        }
-    }, [handleCardClick]);
 
     const getRoleBadgeClass = () => {
         switch (userRole) {
@@ -129,15 +126,11 @@ const BookCard: React.FC<BookCardProps> = ({
         }
     };
 
-
-        const getRoleIcon = (): JSX.Element => {
+    const getRoleIcon = (): JSX.Element => {
         switch (userRole) {
-            case "creator":
-                return <Crown size={16} />;
-            case "admin":
-                return <UserStar size={16} />;
-            default:
-                return <User size={16} />;
+            case 'creator': return <Crown size={16} />;
+            case 'admin': return <Shield size={16} />;
+            default: return <User size={16} />;
         }
     };
 

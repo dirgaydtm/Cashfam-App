@@ -1,10 +1,12 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, usePage } from '@inertiajs/react';
-import type { FinancialBook } from '@/types';
+import { useState } from 'react';
+import type { FinancialBook, Transaction } from '@/types';
 import { X } from 'lucide-react';
 import BookHeader from '@/Components/Book/BookHeader';
 import TransactionsSection from '@/Components/Book/TransactionsSection';
 import AddTransactionForm from '@/Components/Book/AddTransactionForm';
+import DeleteTransactionModal from '@/Components/Book/DeleteTransactionModal';
 
 
 
@@ -22,6 +24,7 @@ interface BookPageProps {
 export default function BookPage() {
     const { book, auth } = usePage().props as unknown as BookPageProps;
     const { user } = auth;
+    const [deleteTransaction, setDeleteTransaction] = useState<Transaction | null>(null);
 
     if (!book) {
         return (
@@ -47,6 +50,38 @@ export default function BookPage() {
     const canEdit = role === 'creator' || role === 'admin';
     const currentUserId = user.id;
 
+    const getCsrfToken = (): string => {
+        const match = document.cookie.match(new RegExp('(^| )XSRF-TOKEN=([^;]+)'));
+        if (match) {
+            return decodeURIComponent(match[2]);
+        }
+        return '';
+    };
+
+    const handleDeleteTransaction = async (transaction: Transaction) => {
+        const csrfToken = getCsrfToken();
+
+        if (!csrfToken) {
+            throw new Error('CSRF token not found');
+        }
+
+        const response = await fetch(`/transactions/${transaction.id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': csrfToken,
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to delete transaction');
+        }
+
+        // Reload page to refresh transaction list
+        window.location.reload();
+    };
+
     return (
         <AuthenticatedLayout>
             <Head title={`Book • ${book.name}`} />
@@ -56,7 +91,10 @@ export default function BookPage() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2">
-                        <TransactionsSection book={book} />
+                        <TransactionsSection
+                            book={book}
+                            onDeleteTransaction={setDeleteTransaction}
+                        />
                     </div>
 
                     <div>
@@ -64,6 +102,13 @@ export default function BookPage() {
                     </div>
                 </div>
             </div>
+
+            <DeleteTransactionModal
+                isOpen={!!deleteTransaction}
+                onClose={() => setDeleteTransaction(null)}
+                transaction={deleteTransaction}
+                onDelete={handleDeleteTransaction}
+            />
         </AuthenticatedLayout>
     );
 }

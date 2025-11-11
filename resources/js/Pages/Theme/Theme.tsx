@@ -2,7 +2,6 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import { THEMES } from '@/constants/themes';
-import { TrendingDown, TrendingUp } from 'lucide-react';
 
 const THEME_KEY = 'app-theme';
 
