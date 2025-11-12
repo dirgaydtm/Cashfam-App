@@ -1,34 +1,38 @@
 import { useEffect, useState } from 'react';
+import { router } from '@inertiajs/react';
 
 const Loader = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [shouldRender, setShouldRender] = useState(false);
 
     useEffect(() => {
-        // Detect page reload/navigation
-        const handleBeforeUnload = () => {
+        const showLoader = () => {
             setShouldRender(true);
-            // Delay untuk trigger animasi
             setTimeout(() => setIsLoading(true), 10);
         };
 
-        // Listen for page unload
-        window.addEventListener('beforeunload', handleBeforeUnload);
+        const hideLoader = () => {
+            setIsLoading(false);
+            setTimeout(() => setShouldRender(false), 300);
+        };
+
+        const removeStartListener = router.on('start', showLoader);
+        const removeFinishListener = router.on('finish', hideLoader);
+
+        window.addEventListener('beforeunload', showLoader);
 
         return () => {
-            window.removeEventListener('beforeunload', handleBeforeUnload);
+            removeStartListener();
+            removeFinishListener();
+            window.removeEventListener('beforeunload', showLoader);
         };
     }, []);
 
     if (!shouldRender) return null;
 
     return (
-        <div
-            className={`fixed inset-0 bg-primary/50 flex items-center justify-center z-100 transition-opacity duration-300 ${isLoading ? 'opacity-100' : 'opacity-0'
-                }`}
-        >
-            <div className={`flex flex-col items-center gap-4 transition-transform duration-500 ${isLoading ? 'scale-100' : 'scale-75'
-                }`}>
+        <div className={`fixed inset-0 bg-primary/50 flex items-center justify-center z-100 transition-opacity duration-300 ${isLoading ? 'opacity-100' : 'opacity-0'}`}>
+            <div className={`transition-transform duration-500 ${isLoading ? 'scale-100' : 'scale-75'}`}>
                 <span className="loading loading-infinity w-24 text-white"></span>
             </div>
         </div>
