@@ -96,7 +96,7 @@ export default function BookHeader({ book, canEdit }: BookHeaderProps) {
     };
 
     return (
-        <div className="card border border-base-content/30">
+        <div className="card border border-base-content/30 overflow-hidden">
             <div className={`card-header ${headerColor} text-base-100`}>
 
                 <div className={`flex items-start ${headerColor} p-5 justify-between mb-6`}>

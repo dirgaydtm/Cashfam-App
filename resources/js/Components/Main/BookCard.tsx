@@ -91,57 +91,53 @@ const BookCard: React.FC<BookCardProps> = ({ book, currentUserId, onManageMember
             onClick={handleCardClick}
         >
             {/* Header Section */}
-            <div className={`card-header card ${headerColor} text-base-100 pl-4 pr-2 py-3`}>
-                <div className="flex justify-between items-start" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex flex-1 flex-col">
-                        <h3 className="card-title flex items-center justify-between text-lg">
-                            <span className="truncate max-w-[16rem] md:max-w-[15rem] lg:max-w-[11rem]">{book.name}</span>
-                            <span className="flex items-center gap-3">
-                                <div className="flex justify-center items-center gap-1">
-                                    <p className="hidden text-sm lg:flex">
-                                        {userRole ? userRole.charAt(0).toUpperCase() + userRole.slice(1) : ""}
-                                    </p>
-                                    {getRoleIcon()}
-                                </div>
-                                {/* Dropdown Menu */}
-                                <div className="dropdown dropdown-end">
-                                    <label
-                                        tabIndex={0}
-                                        role="button"
-                                        onClick={e => e.stopPropagation()}
-                                        className="btn btn-ghost bg-transparent hover:bg-black/5 border-0 hover:shadow-none btn-circle"
-                                    >
-                                        <MoreVertical className="size-6 text-base-100" />
-                                    </label>
-                                    <ul
-                                        tabIndex={0}
-                                        className="dropdown-content z-[1] menu p-0 shadow-xl bg-base-100 rounded-box w-52 mt-1"
-                                        role="menu"
-                                        onClick={e => e.stopPropagation()}
-                                    >
-                                        {menuActions.filter((a) => !a.visible || a.visible()).map((action) => (
-                                            <li key={action.key} role="none">
-                                                <button
-                                                    onClick={evt => {
-                                                        evt.stopPropagation();
-                                                        action.onClick(book);
-                                                    }}
-                                                    className={`p-3 ${action.className}`}
-                                                    role="menuitem"
-                                                    type="button"
-                                                >
-                                                    <action.icon size={16} />
-                                                    {action.label}
-                                                </button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </span>
-                        </h3>
-                        <p className="text-xs md:text-sm h-10 line-clamp-2">{book.description}</p>
-                    </div>
-                </div>
+            <div className={`card-header rounded-b-none ${headerColor} text-base-100 pl-4 pr-2 py-3`} onClick={(e) => e.stopPropagation()}>
+                <h3 className="card-title flex items-center justify-between text-lg">
+                    <span className="truncate max-w-[16rem] md:max-w-[15rem] lg:max-w-[11rem]">{book.name}</span>
+                    <span className="flex items-center gap-3">
+                        <span className="flex items-center gap-1">
+                            <p className="hidden text-sm lg:flex">
+                                {userRole ? userRole.charAt(0).toUpperCase() + userRole.slice(1) : ""}
+                            </p>
+                            {getRoleIcon()}
+                        </span>
+                        {/* Dropdown Menu */}
+                        <div className="dropdown dropdown-end">
+                            <label
+                                tabIndex={0}
+                                role="button"
+                                onClick={e => e.stopPropagation()}
+                                className="btn btn-ghost bg-transparent hover:bg-black/5 border-0 hover:shadow-none btn-circle"
+                            >
+                                <MoreVertical className="size-6 text-base-100" />
+                            </label>
+                            <ul
+                                tabIndex={0}
+                                className="dropdown-content z-[1] menu p-0 shadow-xl bg-base-100 rounded-box w-52 mt-1"
+                                role="menu"
+                                onClick={e => e.stopPropagation()}
+                            >
+                                {menuActions.filter((a) => !a.visible || a.visible()).map((action) => (
+                                    <li key={action.key} role="none">
+                                        <button
+                                            onClick={evt => {
+                                                evt.stopPropagation();
+                                                action.onClick(book);
+                                            }}
+                                            className={`p-3 ${action.className}`}
+                                            role="menuitem"
+                                            type="button"
+                                        >
+                                            <action.icon size={16} />
+                                            {action.label}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </span>
+                </h3>
+                <p className="text-xs md:text-sm h-10 line-clamp-2">{book.description}</p>
             </div>
 
             {/* Body Section */}

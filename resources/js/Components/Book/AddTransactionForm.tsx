@@ -107,10 +107,26 @@ export default function AddTransactionForm({ book, userId }: AddTransactionFormP
 
     return (
         <div className="card border border-base-content/30">
-            <div className="card-body">
+            <div className="card-header flex px-6 py-3 items-center gap-3">
                 <h3 className="font-bold text-lg">Add Transaction</h3>
+                {/* Transaction Type Selector */}
+                {[
+                    { type: 'income', icon: TrendingUp, btnClass: 'btn-success' },
+                    { type: 'expense', icon: TrendingDown, btnClass: 'btn-error' }
+                ].map(({ type, icon: Icon, btnClass }) => (
+                    <button
+                        key={type}
+                        type="button"
+                        className={`btn btn-sm btn-circle ${data.type === type ? btnClass : ''}`}
+                        onClick={() => setData({ ...data, type: type as 'income' | 'expense' })}
+                    >
+                        <Icon size={18} />
+                    </button>
+                ))}
+            </div>
 
-                {/* izin ketua */}
+            <div className="card-body pt-0">
+                {/* Alert Messages */}
                 {success && (
                     <div role="alert" className="alert alert-success">
                         <CheckCircle size={20} />
@@ -124,29 +140,10 @@ export default function AddTransactionForm({ book, userId }: AddTransactionFormP
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-                    {/* Transaction Type Selector */}
-                    <div className="grid grid-cols-2 gap-3">
-                        {[
-                            { type: 'income', icon: TrendingUp, label: 'Income', btnClass: 'btn-success' },
-                            { type: 'expense', icon: TrendingDown, label: 'Expense', btnClass: 'btn-error' }
-                        ].map(({ type, icon: Icon, label, btnClass }) => (
-                            <button
-                                key={type}
-                                type="button"
-                                className={`btn ${data.type === type ? btnClass : 'btn-outline'}`}
-                                onClick={() => setData({ ...data, type: type as 'income' | 'expense' })}
-                            >
-                                <Icon size={18} /> {label}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Amount Input */}
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Amount */}
                     <div className="form-control">
-                        <label className="label">
-                            <span className="label-text font-medium">Amount</span>
-                        </label>
+                        <label className="label"><span className="label-text font-medium">Amount</span></label>
                         <div className="relative">
                             <input
                                 type="text"
@@ -155,55 +152,52 @@ export default function AddTransactionForm({ book, userId }: AddTransactionFormP
                                 placeholder="0"
                                 value={amountDisplay}
                                 onChange={handleAmountChange}
+                                disabled={isLoading}
                                 required
                             />
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/60 z-[1]">Rp</span>
                         </div>
                     </div>
 
-                    {/* Category Select */}
-                    <div className="form-control">
-                        <label className="label">
-                            <span className="label-text font-medium">Category</span>
-                        </label>
-                        <select
-                            className="select select-bordered w-full"
-                            value={data.category}
-                            onChange={(e) => setData({ ...data, category: e.target.value })}
-                            required
-                        >
-                            <option value="" disabled>Select category</option>
-                            {Categories.map((c) => (
-                                <option key={c} value={c}>{c}</option>
-                            ))}
-                        </select>
+                    {/* Category & Date */}
+                    <div className="flex gap-3">
+                        <div className="form-control w-full">
+                            <label className="label"><span className="label-text font-medium">Category</span></label>
+                            <select
+                                className="select select-bordered w-full focus:outline-none"
+                                value={data.category}
+                                onChange={(e) => setData({ ...data, category: e.target.value })}
+                                disabled={isLoading}
+                                required
+                            >
+                                <option value="" disabled>Select category</option>
+                                {Categories.map((c) => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                        </div>
+
+                        <div className="form-control w-full">
+                            <label className="label"><span className="label-text font-medium">Date</span></label>
+                            <input
+                                type="date"
+                                className="input input-bordered w-full focus:outline-none"
+                                value={data.date}
+                                onChange={(e) => setData({ ...data, date: e.target.value })}
+                                disabled={isLoading}
+                                required
+                            />
+                        </div>
                     </div>
 
-                    {/* Date Input */}
+                    {/* Description */}
                     <div className="form-control">
-                        <label className="label">
-                            <span className="label-text font-medium">Date</span>
-                        </label>
-                        <input
-                            type="date"
-                            className="input input-bordered w-full"
-                            value={data.date}
-                            onChange={(e) => setData({ ...data, date: e.target.value })}
-                            required
-                        />
-                    </div>
-
-                    {/* Description Textarea */}
-                    <div className="form-control">
-                        <label className="label">
-                            <span className="label-text font-medium">Description</span>
-                        </label>
+                        <label className="label"><span className="label-text font-medium">Description</span></label>
                         <textarea
-                            className="textarea textarea-bordered w-full"
+                            className="textarea textarea-bordered w-full focus:outline-none"
                             placeholder="Brief description..."
                             value={data.description}
                             onChange={(e) => setData({ ...data, description: e.target.value })}
                             rows={3}
+                            disabled={isLoading}
                             required
                         />
                     </div>
@@ -214,7 +208,14 @@ export default function AddTransactionForm({ book, userId }: AddTransactionFormP
                         className={`btn ${data.type === 'income' ? 'btn-success' : 'btn-error'} w-full`}
                         disabled={isLoading}
                     >
-                        {isLoading ? 'Adding...' : `Add ${data.type === 'income' ? 'Income' : 'Expense'}`}
+                        {isLoading ? (
+                            <>
+                                <span className="loading loading-spinner loading-sm"></span>
+                                Adding...
+                            </>
+                        ) : (
+                            `Add ${data.type === 'income' ? 'Income' : 'Expense'}`
+                        )}
                     </button>
                 </form>
             </div>
