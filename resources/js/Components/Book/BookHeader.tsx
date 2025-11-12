@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import type { FinancialBook } from '@/types';
-import { formatRupiah } from '@/utils/currency';
+import { formatRupiah, formatThousands, parseNumericInput } from '@/utils/currency';
 import { currentUser } from '@/data';
 import { DollarSign, FileText, Save, Settings, PencilIcon } from 'lucide-react';
 import { useForm } from '@inertiajs/react';
 import { getColorById } from '@/utils/colorGenerator';
+
 interface BookSettingsFormData {
     name: string;
     description: string;
@@ -23,6 +24,7 @@ interface BookHeaderProps {
 
 export default function BookHeader({ book, canEdit }: BookHeaderProps) {
     const [isEditing, setIsEditing] = useState(false);
+    const [budgetDisplay, setBudgetDisplay] = useState('');
 
     const { data, setData, patch, delete: destroy } = useForm<BookSettingsFormData>({
         name: book.name,
@@ -60,6 +62,12 @@ export default function BookHeader({ book, canEdit }: BookHeaderProps) {
         },
     ];
 
+    const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseNumericInput(e.target.value);
+        setData('budget', value ? Number(value) : undefined);
+        setBudgetDisplay(formatThousands(value));
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!canEdit) return;
@@ -83,24 +91,25 @@ export default function BookHeader({ book, canEdit }: BookHeaderProps) {
 
     const handleCancel = () => {
         setData({ name: book.name, description: book.description, budget: book.budget ?? undefined });
+        setBudgetDisplay('');
         setIsEditing(false);
     };
 
     return (
         <div className="card border border-base-content/30">
             <div className={`card-header ${headerColor} text-base-100`}>
-                
-                    <div className={`flex items-start ${headerColor} p-5 justify-between mb-6`}>
-                        <div className="flex-1">
-                            <h3 className="text-2xl font-bold">{book.name}</h3>
-                            <p className="mt-2">{book.description}</p>
-                        </div>
-                        {canEdit && !isEditing && (
-                            <button className={`btn btn-ghost btn-md btn-circle bg-transparent hover:bg-base-100 border-0 hover:shadow-none`} onClick={() => setIsEditing(true)}>
-                                <PencilIcon size={20} />
-                            </button>
-                        )}
+
+                <div className={`flex items-start ${headerColor} p-5 justify-between mb-6`}>
+                    <div className="flex-1">
+                        <h3 className="text-2xl font-bold">{book.name}</h3>
+                        <p className="mt-2">{book.description}</p>
                     </div>
+                    {canEdit && !isEditing && (
+                        <button className={`btn btn-ghost btn-md btn-circle bg-transparent hover:bg-base-100 border-0 hover:shadow-none`} onClick={() => setIsEditing(true)}>
+                            <PencilIcon size={20} />
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="card-body">
@@ -143,12 +152,11 @@ export default function BookHeader({ book, canEdit }: BookHeaderProps) {
                             </label>
                             <div className="relative">
                                 <input
-                                    type="number"
+                                    type="text"
+                                    inputMode="numeric"
                                     className="input input-bordered focus:outline-none w-full pl-10"
-                                    value={data.budget || ''}
-                                    onChange={(e) => setData('budget', e.target.value ? Number(e.target.value) : undefined)}
-                                    min={0}
-                                    step={1000}
+                                    value={budgetDisplay}
+                                    onChange={handleBudgetChange}
                                 />
                                 <span className="absolute left-3 top-1/2 z-10 -translate-y-1/2 text-base-content/60">Rp</span>
                             </div>

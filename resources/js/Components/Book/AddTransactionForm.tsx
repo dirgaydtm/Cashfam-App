@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { FinancialBook } from '@/types';
 import { Categories } from '@/constants/categories';
 import { CheckCircle, TrendingDown, TrendingUp, X } from 'lucide-react';
+import { formatThousands, parseNumericInput } from '@/utils/currency';
 
 interface TransactionFormData {
     book_id: number;
@@ -37,11 +38,21 @@ export default function AddTransactionForm({ book, userId }: AddTransactionFormP
     };
 
     const [data, setData] = useState<TransactionFormData>(initialFormData);
+    const [amountDisplay, setAmountDisplay] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
-    const resetForm = () => setData(initialFormData);
+    const resetForm = () => {
+        setData(initialFormData);
+        setAmountDisplay('');
+    };
+
+    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseNumericInput(e.target.value);
+        setData({ ...data, amount: value ? Number(value) : 0 });
+        setAmountDisplay(formatThousands(value));
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -138,16 +149,15 @@ export default function AddTransactionForm({ book, userId }: AddTransactionFormP
                         </label>
                         <div className="relative">
                             <input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                className="input input-bordered w-full pl-10"
-                                placeholder="0.00"
-                                value={data.amount || ''}
-                                onChange={(e) => setData({ ...data, amount: Number(e.target.value) })}
+                                type="text"
+                                inputMode="numeric"
+                                className="input input-bordered w-full pl-10 focus:outline-none"
+                                placeholder="0"
+                                value={amountDisplay}
+                                onChange={handleAmountChange}
                                 required
                             />
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/60">Rp</span>
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/60 z-[1]">Rp</span>
                         </div>
                     </div>
 
