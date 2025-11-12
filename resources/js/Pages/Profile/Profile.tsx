@@ -13,7 +13,7 @@ export default function Profile({ status }: PageProps<{ status?: string }>) {
 
             <div className="flex m-auto h-[75vh] max-w-7xl gap-7 items-center space-y-8">
                 {/* Profile*/}
-                <div className="h-full flex flex-col justify-center items-center gap-2 mb-2 flex-1">
+                <div className="h-full flex flex-col justify-center items-center gap-2 mb-2 flex-1" data-aos="fade-right" data-aos-duration="1000">
                     <InitialAvatar
                         username={user.name}
                         className="w-80 h-80 text-[12rem] m-6"
@@ -25,8 +25,7 @@ export default function Profile({ status }: PageProps<{ status?: string }>) {
                     </div>
                 </div>
 
-
-                <div className='flex flex-col gap-7 flex-2'>
+                <div className='flex flex-col gap-7 flex-2' data-aos="fade-left" data-aos-duration="1000">
                     {/* Update Profile Section */}
                     <UpdateProfileForm />
 
