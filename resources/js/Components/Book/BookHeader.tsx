@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import type { FinancialBook } from '@/types';
 import { formatRupiah, formatThousands, parseNumericInput } from '@/utils/currency';
-import { currentUser } from '@/data';
 import { DollarSign, FileText, Save, Settings, PencilIcon } from 'lucide-react';
 import { useForm } from '@inertiajs/react';
 import { getColorById } from '@/utils/colorGenerator';
@@ -20,9 +19,10 @@ interface BookHeaderProps {
         budget: number | null;
     };
     canEdit: boolean;
+    currentUserId: number;
 }
 
-export default function BookHeader({ book, canEdit }: BookHeaderProps) {
+export default function BookHeader({ book, canEdit, currentUserId }: BookHeaderProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [budgetDisplay, setBudgetDisplay] = useState('');
 
@@ -34,7 +34,7 @@ export default function BookHeader({ book, canEdit }: BookHeaderProps) {
 
     const headerColor = useMemo(() => getColorById(book.id), [book.id]);
 
-    const role = book.members.find((m) => m.user.id === currentUser.id)?.role || 'member';
+    const role = book.members.find((m) => m.user.id === currentUserId)?.role || 'member';
 
     // 🔴 TODO-BE: totalExpenses dan totalIncome seharusnya dari backend
     const totalExpenses = book.total_expenses || 0;

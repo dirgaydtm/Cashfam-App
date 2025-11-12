@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Users, Crown, Shield, User, UserMinus, UserCheck, Mail, Copy, CheckCircle, Loader2, EllipsisVertical } from 'lucide-react';
 import Modal from '@/Layouts/Modal';
-import { currentUser } from '@/data.js';
 import InitialAvatar from '@/Components/Main/InitialAvatar';
 import type { FinancialBook, BookMember } from '@/types';
-import { router, useForm } from '@inertiajs/react';
+import { router, useForm, usePage } from '@inertiajs/react';
 
 interface MembersModalProps {
     isOpen: boolean;
@@ -13,6 +12,8 @@ interface MembersModalProps {
 }
 
 export default function MembersModal({ isOpen, onClose, book }: MembersModalProps) {
+    const { auth } = usePage().props;
+    const currentUserId = auth.user.id;
 
     const [selectedMember, setSelectedMember] = useState<BookMember | null>(null);
     const [actionType, setActionType] = useState<'promote' | 'demote' | 'remove' | null>(null);
@@ -65,7 +66,7 @@ export default function MembersModal({ isOpen, onClose, book }: MembersModalProp
 
     if (!book) return null; // Awalnya periksa 'book'
 
-    const currentMember = book.members.find(m => m.user.id === currentUser.id);
+    const currentMember = book.members.find(m => m.user.id === currentUserId);
     const currentUserRole: 'creator' | 'admin' | 'member' = currentMember?.role || 'creator';
     const isCurrentUserCreator = currentUserRole === 'creator';
     const isCurrentUserAdminOrCreator = currentUserRole === 'creator' || currentUserRole === 'admin';
@@ -211,7 +212,7 @@ export default function MembersModal({ isOpen, onClose, book }: MembersModalProp
                     {/* Members List */}
                     <div className="space-y-3">
                         {book.members.map((member) => {
-                            const isCurrentUser = member.user.id === currentUser.id;
+                            const isCurrentUser = member.user.id === currentUserId;
 
                             // PERBAIKAN LOGIKA: Creator hanya bisa promote/demote ORANG LAIN
                             const canPromoteMember = isCurrentUserCreator
