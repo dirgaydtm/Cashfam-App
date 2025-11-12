@@ -40,7 +40,7 @@ export default function Login({
 
     return (
         <GuestLayout>
-            <Head title="Sign in to CasFam" />
+            <Head title="Sign In" />
 
             <div className="space-y-6">
                 {/* Header */}

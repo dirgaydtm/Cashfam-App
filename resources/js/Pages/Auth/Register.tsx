@@ -24,7 +24,7 @@ export default function Register() {
 
     return (
         <GuestLayout>
-            <Head title="Create your CasFam account" />
+            <Head title="Sign Up" />
 
             <div className="space-y-6">
                 {/* Header */}

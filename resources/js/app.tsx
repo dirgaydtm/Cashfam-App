@@ -5,8 +5,12 @@ import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import Loader from '@/Components/Main/Loader';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Cashfam';
+
+AOS.init();
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

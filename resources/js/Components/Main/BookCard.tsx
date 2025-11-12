@@ -65,8 +65,8 @@ const BookCard: React.FC<BookCardProps> = ({ book, currentUserId, onManageMember
 
     const menuActions: MenuAction[] = useMemo(
         () => [
-            { key: "manage-members", label: "Manage Members / Invite", icon: Users, onClick: onManageMembers, visible: () => canManageBook },
-            { key: "leave-book", label: "Leave Book", icon: LogOut, onClick: (b) => onLeave?.(b), visible: () => canLeaveBook && !!onLeave, className: "text-warning" },
+            { key: "manage-members", label: "Manage Members / Invite", icon: Users, onClick: onManageMembers, visible: () => canManageBook, className: "text-base-content"},
+            { key: "leave-book", label: "Leave Book", icon: LogOut, onClick: (b) => onLeave?.(b), visible: () => canLeaveBook && !!onLeave, className: "text-error" },
             { key: "delete-book", label: "Delete Book", icon: Trash2, onClick: (b) => onDelete?.(b), visible: () => canDeleteBook && !!onDelete, className: "text-error" },
         ],
         [onManageMembers, onLeave, onDelete, canManageBook, canDeleteBook, canLeaveBook]
@@ -84,7 +84,7 @@ const BookCard: React.FC<BookCardProps> = ({ book, currentUserId, onManageMember
 
     return (
         <div
-            className="card border border-base-content/30 hover:shadow-xl hover:-translate-y-1 transition-all duration-200 ease-in-out cursor-pointer"
+            className="card border border-base-content/30 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-200 ease-in-out cursor-pointer"
             role="button"
             tabIndex={0}
             aria-label={`Open transactions for book ${book.name}`}

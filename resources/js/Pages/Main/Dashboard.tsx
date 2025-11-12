@@ -9,7 +9,7 @@ import MembersModal from '@/Components/Main/MembersModal';
 import BookCard from '@/Components/Main/BookCard';
 import LeaveBookModal from '@/Components/Main/LeaveBookModal';
 import DeleteBookModal from '@/Components/Main/DeleteBookModal';
-
+import SplitText from '@/Components/Animations/SplitText';
 
 interface DashboardProps extends PageProps {
     userBooks?: FinancialBook[];
@@ -51,7 +51,6 @@ export default function Dashboard() {
         closeDeleteModal: () => setDeleteBook(null),
     };
 
-
     const hasNoBooks = userBooks.length === 0;
 
     return (
@@ -81,30 +80,43 @@ export default function Dashboard() {
             ) : (
                 <div className='flex flex-col gap-3'>
                     <div className="flex flex-col gap-1 mb-3">
-                        <h1 className="text-xl md:text-2xl font-bold text-base-content">
-                            Welcome back, {user.name}
-                        </h1>
-                        <p className="text-xs md:text-base text-base-content/60">
-                            Manage your collaborative finances
-                        </p>
+                        <SplitText
+                            text={`Welcome back, ${user.name}`}
+                            className="text-xl md:text-2xl font-bold text-base-content"
+                            delay={30}
+                            duration={0.6}
+                            textAlign='start'
+                        />
+                        <SplitText
+                            text={`Manage your collaborative finances`}
+                            className="text-xs md:text-base text-base-content/60"
+                            delay={30}
+                            duration={0.6}
+                            textAlign='start'
+                        />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-                        {userBooks.map(book => (
-                            <BookCard
+                        {userBooks.map((book, index) => (
+                            <div
                                 key={book.id}
-                                // Pastikan kita meyakinkan TypeScript bahwa book memiliki total_income/expenses (dari BE)
-                                // Jika backend belum menyediakan properti ini, berikan nilai default sehingga tipe terpenuhi
-                                book={{
-                                    ...book,
-                                    total_expenses: (book as any).total_expenses ?? 0,
-                                    total_income: (book as any).total_income ?? 0,
-                                    budget: (book as any).budget ?? null,
-                                }}
-                                currentUserId={user.id}
-                                onManageMembers={modalHandlers.openMembersModal}
-                                onLeave={modalHandlers.openLeaveModal}
-                                onDelete={modalHandlers.openDeleteModal}
-                            />
+                                data-aos="fade-up"
+                                data-aos-delay={`${index * 100}`}
+                            >
+                                <BookCard
+                                    // Pastikan kita meyakinkan TypeScript bahwa book memiliki total_income/expenses (dari BE)
+                                    // Jika backend belum menyediakan properti ini, berikan nilai default sehingga tipe terpenuhi
+                                    book={{
+                                        ...book,
+                                        total_expenses: (book as any).total_expenses ?? 0,
+                                        total_income: (book as any).total_income ?? 0,
+                                        budget: (book as any).budget ?? null,
+                                    }}
+                                    currentUserId={user.id}
+                                    onManageMembers={modalHandlers.openMembersModal}
+                                    onLeave={modalHandlers.openLeaveModal}
+                                    onDelete={modalHandlers.openDeleteModal}
+                                />
+                            </div>
                         ))}
                     </div>
                 </div>
