@@ -17,6 +17,7 @@ interface TransactionFormData {
 interface AddTransactionFormProps {
     book: FinancialBook;
     userId: number;
+    onTransactionAdded?: () => void;
 }
 
 const getCsrfToken = (): string => {
@@ -26,7 +27,7 @@ const getCsrfToken = (): string => {
     return match ? decodeURIComponent(match[2]) : '';
 };
 
-export default function AddTransactionForm({ book, userId }: AddTransactionFormProps) {
+export default function AddTransactionForm({ book, userId, onTransactionAdded }: AddTransactionFormProps) {
     const initialFormData: TransactionFormData = {
         book_id: Number(book.id),
         user_id: userId,
@@ -80,8 +81,10 @@ export default function AddTransactionForm({ book, userId }: AddTransactionFormP
                 setSuccess('Transaction added successfully and pending approval.');
                 resetForm();
 
-                // Reload page to refresh transaction list
-                setTimeout(() => window.location.reload(), 1500);
+                // Trigger transaction list reload
+                if (onTransactionAdded) {
+                    setTimeout(() => onTransactionAdded(), 500);
+                }
             } else {
                 const errorData = await response.json();
                 console.error('API Error:', errorData);

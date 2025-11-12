@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { FinancialBook, Transaction } from '@/types';
 import { X } from 'lucide-react';
 import BookHeader from '@/Components/Book/BookHeader';
@@ -25,6 +25,7 @@ export default function BookPage() {
     const { book, auth } = usePage().props as unknown as BookPageProps;
     const { user } = auth;
     const [deleteTransaction, setDeleteTransaction] = useState<Transaction | null>(null);
+    const transactionsSectionRef = useRef<{ refetchTransactions: () => void }>(null);
 
     if (!book) {
         return (
@@ -92,13 +93,18 @@ export default function BookPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2">
                         <TransactionsSection
+                            ref={transactionsSectionRef}
                             book={book}
                             onDeleteTransaction={setDeleteTransaction}
                         />
                     </div>
 
                     <div>
-                        <AddTransactionForm book={book} userId={currentUserId} />
+                        <AddTransactionForm
+                            book={book}
+                            userId={currentUserId}
+                            onTransactionAdded={() => transactionsSectionRef.current?.refetchTransactions()}
+                        />
                     </div>
                 </div>
             </div>
