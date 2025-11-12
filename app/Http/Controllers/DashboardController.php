@@ -28,6 +28,7 @@ class DashboardController extends Controller
         ->withSum(['transactions as total_expenses' => function ($q) {
             $q->where('type', 'expense')->where('status', 'approved');
         }], 'amount')
+        ->orderBy('created_at', 'desc') // Urutkan berdasarkan yang terbaru dibuat
         ->get(); // Ambil koleksi buku
 
         return Inertia::render('Main/Dashboard', [ 
