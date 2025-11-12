@@ -1,8 +1,9 @@
-import { LogOut, MoreVertical, TrendingDown, TrendingUp, Users, Trash2, Crown, UserStar, User, Shield } from "lucide-react";
+import { LogOut, MoreVertical, TrendingDown, TrendingUp, Users, Trash2, Crown, User, Shield } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { FinancialBook } from "@/types";
 import { formatRupiah } from "@/utils/currency";
 import { getSpentPercent } from "@/utils/budget";
+import { getColorById } from "@/utils/colorGenerator";
 import React, { useMemo, useCallback } from "react";
 import { router } from '@inertiajs/react';
 
@@ -35,15 +36,11 @@ interface MenuAction {
     className?: string;
 }
 
-const BookCard: React.FC<BookCardProps> = ({
-    book,
-    currentUserId,
-    onManageMembers,
-    onLeave,
-    onDelete,
-}) => {
-
+const BookCard: React.FC<BookCardProps> = ({ book, currentUserId, onManageMembers, onLeave, onDelete }) => {
     const { total_income, total_expenses, budget } = book;
+
+    // Generate consistent color based on book ID
+    const headerColor = useMemo(() => getColorById(book.id), [book.id]);
 
     const userRole = useMemo(
         () => book.members.find((m) => m.user.id === currentUserId)?.role,
@@ -52,28 +49,12 @@ const BookCard: React.FC<BookCardProps> = ({
 
     const totalIncome = total_income ?? 0;
     const totalExpenses = total_expenses ?? 0;
-
-    const spentPercent = useMemo(
-        () => getSpentPercent(totalExpenses, budget),
-        [totalExpenses, budget]
-    );
+    const spentPercent = useMemo(() => getSpentPercent(totalExpenses, budget), [totalExpenses, budget]);
 
     const summaryItems: SummaryItem[] = useMemo(
         () => [
-            {
-                key: "income",
-                label: "Income",
-                icon: TrendingUp,
-                value: totalIncome,
-                colorClass: "text-success",
-            },
-            {
-                key: "expense",
-                label: "Expense",
-                icon: TrendingDown,
-                value: totalExpenses,
-                colorClass: "text-error",
-            },
+            { key: "income", label: "Income", icon: TrendingUp, value: totalIncome, colorClass: "text-success" },
+            { key: "expense", label: "Expense", icon: TrendingDown, value: totalExpenses, colorClass: "text-error" },
         ],
         [totalIncome, totalExpenses]
     );
@@ -84,47 +65,14 @@ const BookCard: React.FC<BookCardProps> = ({
 
     const menuActions: MenuAction[] = useMemo(
         () => [
-            {
-                key: "manage-members",
-                label: "Manage Members / Invite",
-                icon: Users,
-                onClick: onManageMembers,
-                visible: () => canManageBook,
-            },
-            {
-                key: "leave-book",
-                label: "Leave Book",
-                icon: LogOut,
-                onClick: (b) => onLeave?.(b),
-                visible: () => canLeaveBook && !!onLeave,
-                className: "text-warning",
-            },
-            {
-                key: "delete-book",
-                label: "Delete Book",
-                icon: Trash2,
-                onClick: (b) => onDelete?.(b),
-                visible: () => canDeleteBook && !!onDelete,
-                className: "text-error",
-            },
+            { key: "manage-members", label: "Manage Members / Invite", icon: Users, onClick: onManageMembers, visible: () => canManageBook },
+            { key: "leave-book", label: "Leave Book", icon: LogOut, onClick: (b) => onLeave?.(b), visible: () => canLeaveBook && !!onLeave, className: "text-warning" },
+            { key: "delete-book", label: "Delete Book", icon: Trash2, onClick: (b) => onDelete?.(b), visible: () => canDeleteBook && !!onDelete, className: "text-error" },
         ],
         [onManageMembers, onLeave, onDelete, canManageBook, canDeleteBook, canLeaveBook]
     );
 
-    const handleCardClick = useCallback(() => {
-        router.get(route('books.show', book.id));
-    }, [book.id]);
-
-    const getRoleBadgeClass = () => {
-        switch (userRole) {
-            case "creator":
-                return "badge-primary";
-            case "admin":
-                return "badge-secondary";
-            default:
-                return "badge-neutral";
-        }
-    };
+    const handleCardClick = useCallback(() => router.get(route('books.show', book.id)), [book.id]);
 
     const getRoleIcon = (): JSX.Element => {
         switch (userRole) {
@@ -142,65 +90,63 @@ const BookCard: React.FC<BookCardProps> = ({
             aria-label={`Open transactions for book ${book.name}`}
             onClick={handleCardClick}
         >
-            <div className="card-header card bg-base-100 md:bg-primary-content pl-5 py-3">
-                <div
-                    className="flex justify-between items-start"
-                    onClick={(e) => e.stopPropagation()}
-                >
+            {/* Header Section */}
+            <div className={`card-header card ${headerColor} text-base-100 pl-4 pr-2 py-3`}>
+                <div className="flex justify-between items-start" onClick={(e) => e.stopPropagation()}>
                     <div className="flex flex-1 flex-col">
                         <h3 className="card-title flex items-center justify-between text-lg">
                             <span className="truncate max-w-[16rem] md:max-w-[15rem] lg:max-w-[11rem]">{book.name}</span>
-                            <div className={`badge ${getRoleBadgeClass()}`}>
-                                <p className="hidden lg:flex">
-                                    {userRole ? userRole.charAt(0).toUpperCase() + userRole.slice(1) : ""}
-                                </p>
-                                {getRoleIcon()}
-                            </div>
+                            <span className="flex items-center gap-3">
+                                <div className="flex justify-center items-center gap-1">
+                                    <p className="hidden text-sm lg:flex">
+                                        {userRole ? userRole.charAt(0).toUpperCase() + userRole.slice(1) : ""}
+                                    </p>
+                                    {getRoleIcon()}
+                                </div>
+                                {/* Dropdown Menu */}
+                                <div className="dropdown dropdown-end">
+                                    <label
+                                        tabIndex={0}
+                                        role="button"
+                                        onClick={e => e.stopPropagation()}
+                                        className="btn btn-ghost bg-transparent hover:bg-black/5 border-0 hover:shadow-none btn-circle"
+                                    >
+                                        <MoreVertical className="size-6 text-base-100" />
+                                    </label>
+                                    <ul
+                                        tabIndex={0}
+                                        className="dropdown-content z-[1] menu p-0 shadow-xl bg-base-100 rounded-box w-52 mt-1"
+                                        role="menu"
+                                        onClick={e => e.stopPropagation()}
+                                    >
+                                        {menuActions.filter((a) => !a.visible || a.visible()).map((action) => (
+                                            <li key={action.key} role="none">
+                                                <button
+                                                    onClick={evt => {
+                                                        evt.stopPropagation();
+                                                        action.onClick(book);
+                                                    }}
+                                                    className={`p-3 ${action.className}`}
+                                                    role="menuitem"
+                                                    type="button"
+                                                >
+                                                    <action.icon size={16} />
+                                                    {action.label}
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </span>
                         </h3>
-                        <p className="text-base-content/60 text-xs md:text-sm h-10 line-clamp-2">
-                            {book.description}
-                        </p>
-                    </div>
-
-                    <div className="dropdown dropdown-end">
-                        <label
-                            tabIndex={0}
-                            role="button"
-                            onClick={e => e.stopPropagation()}
-                            className="btn btn-ghost bg-transparent border-0 btn-circle"
-                        >
-                            <MoreVertical className="size-6" />
-                        </label>
-                        <ul
-                            tabIndex={0}
-                            className="dropdown-content z-[1] menu p-0 shadow-xl bg-base-100  rounded-box w-52 mt-1"
-                            role="menu"
-                            onClick={e => e.stopPropagation()}
-                        >
-                            {menuActions
-                                .filter((a) => !a.visible || a.visible())
-                                .map((action) => (
-                                    <li key={action.key} role="none">
-                                        <button
-                                            onClick={evt => {
-                                                evt.stopPropagation();
-                                                action.onClick(book);
-                                            }}
-                                            className={`p-3 ${action.className}`}
-                                            role="menuitem"
-                                            type="button"
-                                        >
-                                            <action.icon size={16} />
-                                            {action.label}
-                                        </button>
-                                    </li>
-                                ))}
-                        </ul>
+                        <p className="text-xs md:text-sm h-10 line-clamp-2">{book.description}</p>
                     </div>
                 </div>
-
             </div>
+
+            {/* Body Section */}
             <div className="hidden md:flex card-body gap-6 p-5">
+                {/* Budget Progress */}
                 {book.budget && (
                     <div className="hidden lg:flex flex-col">
                         <div className="flex justify-between text-xs lg:text-sm mb-1">
@@ -220,15 +166,12 @@ const BookCard: React.FC<BookCardProps> = ({
                     </div>
                 )}
 
+                {/* Income & Expense Summary */}
                 <div className="flex gap-6">
                     {summaryItems.map((item) => (
                         <div key={item.key} className="flex gap-1 items-center">
-                            <div className={`text-lg font-semibold ${item.colorClass}`}>
-                                {formatRupiah(item.value)}
-                            </div>
-                            <div className={`flex items-center ${item.colorClass}`}>
-                                <item.icon size={20} aria-label={item.label} />
-                            </div>
+                            <div className={`text-lg font-semibold ${item.colorClass}`}>{formatRupiah(item.value)}</div>
+                            <item.icon size={20} aria-label={item.label} className={item.colorClass} />
                         </div>
                     ))}
                 </div>

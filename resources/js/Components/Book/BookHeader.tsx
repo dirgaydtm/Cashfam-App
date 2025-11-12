@@ -4,7 +4,7 @@ import { formatRupiah } from '@/utils/currency';
 import { currentUser } from '@/data';
 import { DollarSign, FileText, Save, Settings, PencilIcon } from 'lucide-react';
 import { useForm } from '@inertiajs/react';
-
+import { getColorById } from '@/utils/colorGenerator';
 interface BookSettingsFormData {
     name: string;
     description: string;
@@ -29,6 +29,8 @@ export default function BookHeader({ book, canEdit }: BookHeaderProps) {
         description: book.description,
         budget: book.budget ?? undefined,
     });
+
+    const headerColor = useMemo(() => getColorById(book.id), [book.id]);
 
     const role = book.members.find((m) => m.user.id === currentUser.id)?.role || 'member';
 
@@ -86,6 +88,21 @@ export default function BookHeader({ book, canEdit }: BookHeaderProps) {
 
     return (
         <div className="card border border-base-content/30">
+            <div className={`card-header ${headerColor} text-base-100`}>
+                
+                    <div className={`flex items-start ${headerColor} p-5 justify-between mb-6`}>
+                        <div className="flex-1">
+                            <h3 className="text-2xl font-bold">{book.name}</h3>
+                            <p className="mt-2">{book.description}</p>
+                        </div>
+                        {canEdit && !isEditing && (
+                            <button className={`btn btn-ghost btn-md btn-circle bg-transparent hover:bg-base-100 border-0 hover:shadow-none`} onClick={() => setIsEditing(true)}>
+                                <PencilIcon size={20} />
+                            </button>
+                        )}
+                    </div>
+            </div>
+
             <div className="card-body">
                 {/* Header dengan Edit Button */}
                 {isEditing ? (
@@ -149,18 +166,6 @@ export default function BookHeader({ book, canEdit }: BookHeaderProps) {
                     </form>
                 ) : (
                     <>
-                        <div className="flex items-start justify-between mb-6">
-                            <div className="flex-1">
-                                <h3 className="text-2xl font-bold">{book.name}</h3>
-                                <p className="text-base-content/70 mt-2">{book.description}</p>
-                            </div>
-                            {canEdit && (
-                                <button className="btn btn-ghost btn-md btn-circle" onClick={() => setIsEditing(true)}>
-                                    <PencilIcon size={20} />
-                                </button>
-                            )}
-                        </div>
-
                         {/* Statistics Grid */}
                         <div className="flex gap-5">
                             {/* Monthly Budget Progress */}
