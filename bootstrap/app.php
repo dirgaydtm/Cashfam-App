@@ -19,5 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Redirect 404 errors to external website
+        $exceptions->respond(function ($response) {
+            if ($response->getStatusCode() === 404) {
+                return redirect('https://kbmdsi.ub.ac.id/404'); 
+            }
+            return $response;
+        });
     })->create();
