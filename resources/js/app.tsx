@@ -12,6 +12,9 @@ const appName = import.meta.env.VITE_APP_NAME || 'Cashfam';
 
 AOS.init();
 
+const savedTheme = localStorage.getItem('app-theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) =>

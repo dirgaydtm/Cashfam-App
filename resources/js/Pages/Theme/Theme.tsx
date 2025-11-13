@@ -1,19 +1,14 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { THEMES } from '@/constants/themes';
 
 const THEME_KEY = 'app-theme';
 
 export default function Theme() {
-  const prefersDark = useMemo(() => {
-    if (typeof window === 'undefined') return false;
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  }, []);
-
   const [theme, setTheme] = useState<string>(() => {
     if (typeof window === 'undefined') return 'light';
-    return localStorage.getItem(THEME_KEY) || (prefersDark ? 'dark' : 'light');
+    return localStorage.getItem(THEME_KEY) || 'light';
   });
 
   useEffect(() => {
@@ -52,7 +47,7 @@ export default function Theme() {
         </div>
 
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 lg:gap-6">
-          {THEMES.map((t) => {
+          {THEMES.map((t, index) => {
             const active = t === theme;
             return (
               <button
