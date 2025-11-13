@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Models\FinancialBook;
 
 
@@ -30,16 +31,14 @@ class TransactionController extends Controller
             'user_id' => 'required|integer',
             'type' => 'required|in:income,expense',
             'category' => 'required|string',
-            'amount' => 'required|numeric|min:0.01', // Tambahkan min value
+            'amount' => 'required|numeric|min:0.01', 
             'description' => 'required|string',
             'date' => 'required|date',
         ]);
 
-        // Set nilai default untuk field yang tidak diinput user
         $validated['status'] = 'pending';        
         $validated['approved_by'] = null;        
         
-        // Buat transaksi baru
         $transaction = Transaction::create($validated);
 
         return response()->json([
@@ -49,55 +48,65 @@ class TransactionController extends Controller
     }
 
 
-    // Tampilkan detail transaksi berdasarkan ID
     public function show($id)
     {
         $transaction = Transaction::with(['user', 'approvedBy'])->findOrFail($id);
         return response()->json($transaction);
     }
 
+    public function destroy(Transaction $transaction)
+    {
+        $user = Auth::user();
+
+        $book = $transaction->book; 
+        $member = $book->members()->where('user_id', $user->id)->first();
+
+        if (!$member || !in_array($member->role, ['creator', 'admin'])) {
+            Log::warning("Akses Ditolak: User ID {$user->id} mencoba menghapus Transaksi ID {$transaction->id} tanpa izin.");
+            return response()->json(['message' => 'Anda tidak memiliki hak untuk menghapus transaksi ini.'], 403);
+        }
+
+        try {
+            $transactionName = $transaction->description;
+            $transaction->delete();
+
+            Log::info("Transaksi ID {$transaction->id} ({$transactionName}) berhasil dihapus oleh User ID {$user->id}.");
+            
+            return response()->json(['message' => 'Transaksi berhasil dihapus.'], 200);
+
+        } catch (\Exception $e) {
+            Log::error('Transaction deletion failed: ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal menghapus transaksi karena kesalahan server.'], 500);
+        }
+    }
+
     public function approve(Transaction $transaction, Request $request)
     {
         if (!Auth::check()) {
-            // Ini seharusnya tidak terjadi jika middleware 'auth' berjalan,
-            // tetapi ini adalah pemeriksaan keamanan tambahan untuk 500 error
             return response()->json(['message' => 'User not authenticated.'], 401);
         }
 
         $userId = Auth::id();
 
-        // 2. Otorisasi: Pastikan pengguna memiliki izin di buku ini
-        // Asumsi: Transaksi memiliki relasi 'book'
         $book = $transaction->book; 
-        
-        // Asumsi: Model Book memiliki relasi 'members'
-        // Anda perlu memastikan tabel/model BookMember ada dan memiliki kolom user_id dan role
+
         $member = $book->members()->where('user_id', $userId)->first();
 
-        // Cek apakah pengguna adalah member dan memiliki peran 'creator' atau 'admin'
         if (!$member || !in_array($member->role, ['creator', 'admin'])) {
              return response()->json(['message' => 'Anda tidak memiliki izin (admin/creator) untuk menyetujui transaksi ini.'], 403);
         }
 
-
-        // 3. Cek Status: Hanya bisa menyetujui yang 'pending'
         if ($transaction->status !== 'pending') {
             return response()->json(['message' => 'Transaksi sudah disetujui atau ditolak sebelumnya.'], 400);
         }
 
-        // 4. Update Status
         $transaction->status = 'approved';
-        $transaction->approved_by = $userId; // Gunakan ID yang sudah divalidasi
+        $transaction->approved_by = $userId; 
         
-        // Memastikan penyimpanan berhasil
         if (!$transaction->save()) {
-             // Jika ada masalah database selain constraint violation (misalnya, koneksi), ini membantu menangkapnya
              return response()->json(['message' => 'Gagal menyimpan perubahan status transaksi ke database.'], 500);
         }
         
-        // 5. Update Saldo Buku (Logika ini harus diimplementasikan secara terpisah, misalnya di service layer atau event)
-        // ...
-
         return response()->json(['message' => 'Transaksi berhasil disetujui.', 'transaction' => $transaction->load(['user', 'approvedBy'])]);
     }
 
@@ -114,18 +123,11 @@ class TransactionController extends Controller
         if (!$member || !in_array($member->role, ['creator', 'admin'])) {
              return response()->json(['message' => 'Anda tidak memiliki izin (admin/creator) untuk menolak transaksi ini.'], 403);
         }
-
-        // Cek Status
         if ($transaction->status !== 'pending') {
             return response()->json(['message' => 'Transaksi sudah disetujui atau ditolak sebelumnya.'], 400);
         }
 
-        // Update Status
         $transaction->status = 'rejected';
-        // Opsional: Anda mungkin ingin mencatat siapa yang menolak, tergantung desain skema Anda
-        // $transaction->approved_by = $userId; 
-        // $transaction->approved_at = now(); 
-        
         if (!$transaction->save()) {
             return response()->json(['message' => 'Gagal menyimpan perubahan status transaksi ke database.'], 500);
         }

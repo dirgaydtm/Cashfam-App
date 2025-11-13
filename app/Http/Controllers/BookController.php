@@ -8,8 +8,8 @@ use App\Models\BookMember;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str; // <-- Tambahkan ini untuk membuat kode unik
-use Inertia\Inertia; // Opsional, tetapi bagus untuk konteks Inertia
+use Illuminate\Support\Str; 
+use Inertia\Inertia; 
 use Illuminate\Validation\ValidationException;
 use App\Http\Requests\UpdateBookRequest;
 use App\Http\Requests\UpdateBookMemberRequest;
@@ -210,33 +210,34 @@ class BookController extends Controller
         return redirect()->back()->with('success', 'Detail buku berhasil diperbarui.');
     }
 
-
-    public function destroy(FinancialBook $book, BookMember $member)
+    public function destroyBook(FinancialBook $book)
     {
-        // Pastikan ini adalah rute penghapusan anggota
-        if (request()->route()->getName() !== 'books.members.destroy') {
-             abort(404);
+        $bookName = $book->name;
+
+        if (Auth::id() !== $book->creator_id) {
+            Log::warning("GAGAL HAPUS: Pengguna ID " . Auth::id() . " mencoba menghapus buku (ID: {$book->id}) yang bukan miliknya.");
+            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk menghapus buku ini.');
         }
 
-        $this->authorizeCreator($book);
-        
-        if ($member->book_id !== $book->id) {
-            return back()->withErrors(['error' => 'Anggota tidak valid untuk buku ini.']);
-        }
-
-        if ($member->role === 'creator') {
-            return back()->withErrors(['error' => 'Creator tidak dapat dihapus dari buku.']);
-        }
+        Log::info("MEMULAI PENGHAPUSAN: Buku ID {$book->id} ({$bookName}) oleh Pengguna ID " . Auth::id());
 
         try {
-            $member->delete();
-            return back()->with('success', 'Anggota berhasil dihapus dari buku.');
+            $book->transactions()->delete(); 
+            $book->members()->delete();      
+            $book->delete();
+
+            Log::info("SUKSES HAPUS: Buku ID {$book->id} ({$bookName}) berhasil dihapus.");
+
+            return redirect()->route('dashboard')
+                            ->with('success', "Buku '{$bookName}' berhasil dihapus secara permanen.");
 
         } catch (\Exception $e) {
-            Log::error("Failed to remove member ID {$member->user_id}: " . $e->getMessage());
-            return back()->withErrors(['error' => 'Gagal menghapus anggota.']);
+            Log::error("ERROR DATABASE saat menghapus buku ID {$book->id}: " . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Gagal menghapus buku karena kesalahan sistem. Mungkin ada data terkait yang tidak dapat dihapus.');
         }
     }
+
 
     public function leave(FinancialBook $book)
     {
@@ -338,8 +339,6 @@ class BookController extends Controller
      */
     protected function updateMemberRole(UpdateBookMemberRequest $request, FinancialBook $book, BookMember $member)
     {
-        // TAMBAHAN FIX 1: Otomatisasi Creator di Controller
-        // Ini akan menangani 403 jika UpdateBookMemberRequest gagal mengotorisasi Creator.
         $this->authorizeCreator($book);
 
         if ($member->book_id !== $book->id) {
@@ -351,7 +350,6 @@ class BookController extends Controller
         }
 
         $action = $request->validated('action');
-        // TAMBAHAN FIX 2: Mengubah peran promosi dari 'editor' menjadi 'admin'
         $newRole = $action === 'promote' ? 'admin' : 'member'; 
 
         if ($member->role === 'creator') {
@@ -373,7 +371,5 @@ class BookController extends Controller
             Log::error("Failed to update member role ID {$member->user_id}: " . $e->getMessage());
             return back()->withErrors(['error' => 'Gagal mengubah peran anggota.']);
         }
-    }   
-
-   
+    }      
 }

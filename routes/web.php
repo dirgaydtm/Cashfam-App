@@ -33,18 +33,18 @@ Route::middleware(['auth','verified'])->group(function () {
 
     Route::post('/books', [BookController::class, 'store'])->name('books.store');
     Route::patch('/books/{book}', [BookController::class, 'update'])->name('books.update');
-    Route::delete('/books/{book}', [BookController::class, 'destroy'])->name('books.destroy');
     Route::post('/books/join', [BookController::class, 'join'])->name('books.join');
     Route::post('/books/{book}/leave', [BookController::class, 'leave'])->name('books.leave');
 
-    Route::resource('books', BookController::class);
+    Route::delete('/books/{book}', [BookController::class, 'destroyBook'])->name('books.destroy');
+    Route::get('/books/{book}', [BookController::class, 'show'])->name('books.show');
 
     Route::post('books/{book}/regenerate-invitation', [BookController::class, 'regenerateInvitation'])
          ->name('books.regenerate-invitation');
 
     Route::resource('books.members', BookController::class)->only([
-        'update', // PATCH /books/{book}/members/{member}
-        'destroy', // DELETE /books/{book}/members/{member}
+        'update',
+        'destroy', 
     ]);
     
     Route::patch('books/{book}/members/{member}', [BookController::class, 'updateMember'])
@@ -59,6 +59,7 @@ Route::middleware(['auth','verified'])->group(function () {
 
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
+    Route::delete('/transactions/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
     
     Route::post('/transactions/{transaction}/approve', [TransactionController::class, 'approve'])->name('transactions.approve');
     Route::post('/transactions/{transaction}/reject', [TransactionController::class, 'reject'])->name('transactions.reject');
