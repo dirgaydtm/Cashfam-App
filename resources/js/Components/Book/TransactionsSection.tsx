@@ -39,17 +39,19 @@ const matchesSearchTerm = (transaction: Transaction, searchTerm: string): boolea
 };
 
 // Status Badge Component
-function StatusBadge({ status }: { status: Transaction['status'] }) {
-    if (status === 'pending') {
-        return null; // No badge for pending status
+function StatusBadge({ status, canApprove }: { status: Transaction['status']; canApprove: boolean }) {
+    // Jangan tampilkan badge pending jika user tidak punya izin approve
+    if (status === 'pending' && canApprove) {
+        return null;
     }
 
     const badges = {
         approved: { className: 'badge-success', icon: CheckCircle, label: 'Approved' },
         rejected: { className: 'badge-error', icon: XCircle, label: 'Rejected' },
+        pending: { className: 'badge-warning', icon: XCircle, label: 'Pending' },
     };
 
-    const badge = badges[status as 'approved' | 'rejected'];
+    const badge = badges[status as 'approved' | 'rejected' | 'pending'];
     if (!badge) return null;
 
     const Icon = badge.icon;
@@ -178,7 +180,7 @@ const TransactionsSection = forwardRef<TransactionsSectionRef, TransactionsSecti
         const handleReject = (transaction: Transaction) => handleAction(transaction, 'reject');
 
         const canDeleteTransaction = (transaction: Transaction): boolean => {
-            return userRole === 'creator' || userRole === 'admin' || transaction.user.id === auth.user.id;
+            return userRole === 'creator' || userRole === 'admin';
         };
 
 
@@ -263,7 +265,7 @@ const TransactionsSection = forwardRef<TransactionsSectionRef, TransactionsSecti
                                                             <p className={`font-bold ${isIncome ? 'text-success' : 'text-error'}`}>
                                                                 {isIncome ? '+' : '-'}{formatRupiah(t.amount)}
                                                             </p>
-                                                            <StatusBadge status={t.status} />
+                                                            <StatusBadge status={t.status} canApprove={canApproveTransactions} />
                                                             {isPending && canApproveTransactions && (
                                                                 <div className="flex gap-2">
                                                                     <button className="btn btn-success btn-sm" onClick={(e) => { e.stopPropagation(); handleApprove(t); }}>
