@@ -1,14 +1,13 @@
-Anggota Kelompok 6 
-: 
-- Dirga yuditama
-- Oracle tio panjaitan
-- Yance adhy panjaitan
-- Arevanda lazuardi arrayan
-- Rajibin putra ilman
-  
 # 💰 CashFam App
 
   CashFam is a collaborative financial management application that enables multiple users to manage shared cash books with role-based permissions. Perfect for families, teams, or organizations that need to track shared expenses and income together.
+
+# 👥 Group Members 6
+- Dirga yuditama - 245150400111034
+- Oracle tio panjaitan - 245150400111069
+- Yance adhy panjaitan - 	245150407111029
+- Arevanda lazuardi arrayan - 245150407111091
+- Rajibin putra ilman - 245150407111084
 
 ## ✨ Features
 
